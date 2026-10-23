@@ -585,7 +585,7 @@ const HF=['Pacifico','Orbitron','"Playfair Display"','"Bebas Neue"','Lobster','"
 let hrT=0,hrI=-1;
 function heroRun(on){clearInterval(hrT);hrT=0}
 /* ---------- copy buttons ---------- */
-$$('.res').forEach(r=>{const b=document.createElement('button');b.innerHTML='Copy result';b.style.marginTop='6px';b.onclick=()=>{if(r.id==='wco'&&$('#wci').value.trim().toLowerCase()==='games'){window.location.href='https://poki.com/';return}copy(r.innerText,b)};r.after(b)});
+$$('.res').forEach(r=>{const b=document.createElement('button');b.innerHTML='Copy result';b.style.marginTop='6px';b.onclick=()=>{if(r.id==='wco'&&$('#wci').value.trim().toLowerCase()==='games'){window.location.href='/bonfyre';return}copy(r.innerText,b)};r.after(b)});
 show(location.hash.slice(1)||'home');
 </script>
 <script type="module">
