@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&family=Orbitron:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Lobster&family=Press+Start+2P&family=Righteous&family=Caveat:wght@700&family=Special+Elite&family=Abril+Fatface&family=Monoton&family=Permanent+Marker&display=swap">
+<title>Bonfyre</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<style>
+:root{--bg:#15171b;--p:#1e2127;--p2:#2a2e37;--t:#ece9e1;--m:#9a9ca3;--a:#f2b84b;--b:#56c7b0;--on:#15171b;--r:#ef6f6c;--ln:#343944;--gr:#2a2e37;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f3ee;--p:#fff;--p2:#eceae2;--t:#1d1f24;--m:#666a73;--a:#b7791f;--b:#16836d;--r:#c2413d;--ln:#d8d5ca;--gr:#e3e0d6}}
+:root[data-theme="light"]{--bg:#f4f3ee;--p:#fff;--p2:#eceae2;--t:#1d1f24;--m:#666a73;--r:#c2413d;--ln:#d8d5ca;--gr:#e3e0d6}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (pointer:fine) and (prefers-reduced-motion:no-preference){html.ipad-cursor-ready,html.ipad-cursor-ready *{cursor:none!important}}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+
+
+nav{width:226px;flex:none;background:var(--p);border-right:1px solid var(--ln);padding:16px 10px;position:sticky;top:0;height:100vh;overflow:auto}
+nav h1{font:italic 700 24px Georgia,"Iowan Old Style",serif;margin:0 8px 14px;letter-spacing:.3px}
+nav a{display:flex;align-items:center;padding:6px 10px;border-radius:10px;color:var(--m);text-decoration:none;cursor:pointer}
+nav a:hover,nav a.on{background:var(--p2);color:var(--t)}nav a.on{box-shadow:inset 3px 0 var(--a)}
+main{flex:1;min-width:0;padding:22px 26px;max-width:1100px}
+h2{font:italic 700 28px Georgia,serif;margin:0 0 4px;display:flex;align-items:center}.sub{color:var(--m);margin:0 0 16px}
+.card{background:var(--p);border:1px solid var(--ln);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.tile{background:var(--p);border:1px solid var(--ln);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s}
+.tile:hover{border-color:var(--a);transform:translateY(-2px)}.tile b{display:block;font-family:Georgia,serif;font-size:17px}.tile span{color:var(--m);font-size:13px}
+input,select,textarea,button{font:inherit;color:var(--t);background:var(--p2);border:1px solid var(--ln);border-radius:8px;padding:7px 10px}
+input,textarea{width:100%}textarea{font-family:ui-monospace,Menlo,monospace;min-height:70px}
+button{cursor:pointer;width:auto}button:hover{border-color:var(--a)}button.pri{background:var(--a);color:var(--on);border-color:var(--a);font-weight:600}
+:focus-visible{outline:2px solid var(--a);outline-offset:1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.row>label{flex:1;min-width:110px;color:var(--m);font-size:13px}.row>label input{margin-top:3px}
+.res{font:15px/1.7 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:12px;min-height:44px}
+.err{color:var(--r)}.ok{color:var(--b)}
+.calc{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;margin-top:10px}.keys,.fnp .g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;align-content:start}.keys button{padding:15px 0;font-size:19px}.fnp .g{grid-template-columns:repeat(3,1fr);margin-bottom:12px}.fnp .g button{padding:10px 0;font-size:15px}.fnp small{display:block;color:var(--m);font-size:12px;margin:0 0 5px}.calc button.num{font-weight:600}.calc button.op{color:var(--a);font-weight:700}.calc button.fnk{color:var(--b)}.calc button.clr{color:var(--r);font-weight:700}.calc button.eq{grid-column:span 4;background:var(--a);color:var(--on);border-color:var(--a);font-weight:700;font-size:22px}
+#disp{font:22px ui-monospace,monospace;text-align:right}#ans{text-align:right;font:28px Georgia,serif;color:var(--a);min-height:40px;margin:6px 0}
+#gc{width:100%;height:min(62vh,520px);display:block;border-radius:10px;background:var(--bg);border:1px solid var(--ln);touch-action:none;cursor:grab}
+.fn{display:flex;gap:6px;margin-bottom:6px;align-items:center}.fn i{width:14px;height:14px;border-radius:50%;flex:none}.fn input[type=checkbox]{width:auto}
+table{border-collapse:collapse}td,th{border:1px solid var(--ln);padding:4px 10px;text-align:right}
+.bars{display:flex;align-items:flex-end;gap:3px;height:90px}.bars div{flex:1;background:var(--b);border-radius:3px 3px 0 0}
+.ed{display:grid;grid-template-columns:1fr 1fr;gap:14px}.ed textarea{min-height:380px;white-space:pre;tab-size:2}#hf{width:100%;height:380px;border:1px solid var(--ln);border-radius:10px;background:#fff}.row button.on{border-color:var(--a);color:var(--a)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:7px}
+#cc{width:56px;height:40px;padding:2px;cursor:pointer}#hx{width:110px;font-family:ui-monospace,Menlo,monospace}
+.grp{margin:2px 0}
+.gh{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;border-radius:10px;padding:8px 10px;color:var(--t);font-weight:600;text-align:left}
+.gh:hover{background:var(--p2);border-color:transparent}
+.car{width:7px;height:7px;border-right:2px solid var(--m);border-bottom:2px solid var(--m);transform:rotate(-45deg);transition:transform .15s}
+.grp.open .car{transform:rotate(45deg)}
+.gb{display:none;margin:2px 0 6px 10px;padding-left:6px;border-left:1px solid var(--ln)}
+.grp.open .gb{display:block}
+nav a.top-l{padding:8px 10px;font-weight:600;color:var(--t)}nav a.top-l i{width:22px;margin-right:6px;text-align:center;color:var(--a)}
+.gh i{width:22px;margin-right:6px;text-align:center;color:var(--a)}
+.gt{font:600 12px system-ui;text-transform:uppercase;letter-spacing:.08em;color:var(--m);margin:20px 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+/* ---------- Bonfyre animated homepage ---------- */
+.bonfyre-home{width:100%;min-height:100vh;display:grid;place-items:center;overflow:hidden;position:relative;isolation:isolate}
+main:has(#v-home:not([hidden])){max-width:none;padding:0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+#v-home{width:100%;min-width:0}
+#v-home[hidden]{display:none}
+.bonfyre-fire{width:min(340px,78vw);height:370px;position:relative;display:grid;place-items:center;filter:drop-shadow(0 0 28px #ff6b1833)}
+.bonfyre-glow{position:absolute;width:76%;height:45%;bottom:9%;border-radius:50%;background:radial-gradient(ellipse,#ff6a18aa 0%,#f33b1533 42%,transparent 72%);filter:blur(15px);animation:bonfyre-glow 2.2s ease-in-out infinite alternate}
+.bonfyre-flames{position:absolute;inset:3% 5% 12%;}
+.bonfyre-flame{position:absolute;bottom:12%;left:50%;transform-origin:50% 100%;border-radius:55% 45% 48% 52% / 68% 65% 35% 32%;filter:blur(.3px);animation:bonfyre-flicker 1.1s ease-in-out infinite alternate}
+.bonfyre-flame.outer{width:48%;height:70%;margin-left:-24%;background:linear-gradient(0deg,#ff3d18 0%,#ff7b16 47%,#ffb52e 75%,#fff0a3 100%);clip-path:polygon(50% 0,62% 19%,82% 34%,88% 54%,78% 78%,63% 94%,50% 100%,31% 94%,14% 78%,7% 58%,18% 39%,35% 26%)}
+.bonfyre-flame.left{width:38%;height:48%;margin-left:-36%;bottom:10%;background:linear-gradient(0deg,#ed3218,#ff8b20 66%,#ffe57a);animation-delay:-.4s;transform:rotate(-13deg);clip-path:polygon(52% 0,64% 23%,90% 41%,87% 64%,72% 84%,50% 100%,25% 91%,10% 70%,15% 48%,36% 29%)}
+.bonfyre-flame.right{width:37%;height:53%;margin-left:-1%;bottom:10%;background:linear-gradient(0deg,#f33b13,#ff8b18 60%,#ffe58a);animation-delay:-.7s;transform:rotate(14deg);clip-path:polygon(48% 0,67% 22%,87% 40%,94% 62%,78% 84%,52% 100%,28% 91%,12% 70%,16% 49%,35% 28%)}
+.bonfyre-flame.core{width:28%;height:42%;margin-left:-14%;bottom:12%;background:linear-gradient(0deg,#ff8b19,#ffd34d 57%,#fff9cf);animation-delay:-.2s;clip-path:polygon(50% 0,69% 28%,81% 48%,72% 73%,57% 94%,43% 100%,25% 85%,17% 65%,27% 42%,39% 26%)}
+.bonfyre-logs{position:absolute;bottom:14%;width:58%;height:12%;}
+.bonfyre-log{position:absolute;left:8%;top:35%;width:84%;height:25%;border-radius:999px;background:linear-gradient(180deg,#754329,#39221b 55%,#211715);box-shadow:inset 0 2px 2px #d18a4d55,0 7px 9px #0005}
+.bonfyre-log.one{transform:rotate(19deg)}.bonfyre-log.two{transform:rotate(-19deg);background:linear-gradient(180deg,#8b4b2a,#42251a 55%,#211715)}
+.bonfyre-spark{position:absolute;bottom:32%;left:50%;width:4px;height:4px;border-radius:50%;background:#ffe5a0;box-shadow:0 0 8px 2px #ff8c27;animation:bonfyre-spark 2.5s linear infinite}
+.bonfyre-spark.s2{left:36%;animation-delay:-1.2s;animation-duration:2s}.bonfyre-spark.s3{left:64%;animation-delay:-.7s;animation-duration:2.8s}.bonfyre-spark.s4{left:45%;animation-delay:-1.8s;animation-duration:3.1s}
+@keyframes bonfyre-flicker{0%{filter:brightness(.94);scale:1 .96;rotate:-2deg}40%{scale:.97 1.04;rotate:1deg}100%{filter:brightness(1.12);scale:1.03 1;rotate:2deg}}
+@keyframes bonfyre-glow{from{opacity:.65;transform:scale(.9)}to{opacity:1;transform:scale(1.08)}}
+@keyframes bonfyre-spark{0%{opacity:0;transform:translate(0,15px) scale(.5)}15%{opacity:1}100%{opacity:0;transform:translate(12px,-145px) scale(0)}}
+@media(prefers-reduced-motion:reduce){.bonfyre-flame,.bonfyre-glow,.bonfyre-spark{animation:none!important}}
+@media(max-width:760px){body{display:block}nav{width:auto;height:auto;position:static;max-height:48vh;padding:10px;border-right:0;border-bottom:1px solid var(--ln)}nav h1{margin-bottom:8px}main{padding:14px}main:has(#v-home:not([hidden])){padding:0;min-height:calc(100vh - 48vh)}.bonfyre-home{min-height:calc(100vh - 48vh)}.calc{grid-template-columns:1fr}.keys{order:-1}.ed{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.notes-toolbar{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:7px;background:var(--bg);border:1px solid var(--ln);border-radius:10px;margin-bottom:10px;position:sticky;top:6px;z-index:2}.notes-toolbar button,.notes-toolbar select{width:auto;min-width:32px;padding:5px 8px;border-radius:6px}.notes-toolbar select{max-width:145px}.nt-color{display:flex;align-items:center;gap:3px;padding:2px 5px;border:1px solid var(--ln);border-radius:6px;color:var(--t);font-size:13px}.nt-color input{width:22px;height:24px;padding:0;border:0;background:transparent}.notes-toolbar button:focus{border-color:var(--a)}#nt{min-height:340px;padding:14px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);color:var(--t);outline:none;overflow-wrap:anywhere}#nt:empty:before{content:attr(data-placeholder);color:var(--m);pointer-events:none}#nt h1,#nt h2,#nt h3{font-family:inherit;font-style:normal}#nt blockquote{border-left:3px solid var(--a);margin-left:0;padding-left:12px;color:var(--m)}#nt pre{white-space:pre-wrap;background:var(--p2);padding:8px;border-radius:6px}
+
+</style></head><body>
+<nav id="nav"></nav>
+<main>
+
+<section id="v-home" aria-label="Bonfyre homepage">
+  <div class="bonfyre-home" role="img" aria-label="A softly animated bonfire">
+    <div class="bonfyre-fire">
+      <div class="bonfyre-glow"></div>
+      <div class="bonfyre-flames">
+        <div class="bonfyre-flame outer"></div>
+        <div class="bonfyre-flame left"></div>
+        <div class="bonfyre-flame right"></div>
+        <div class="bonfyre-flame core"></div>
+        <span class="bonfyre-spark"></span><span class="bonfyre-spark s2"></span><span class="bonfyre-spark s3"></span><span class="bonfyre-spark s4"></span>
+      </div>
+      <div class="bonfyre-logs"><div class="bonfyre-log one"></div><div class="bonfyre-log two"></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="v-graph" hidden><h2>Graphing calculator</h2><p class="sub">Type an equation or inequality in the black box, e.g. y=mx+b or y&gt;2x-1, then press Enter. Letters like m and b get sliders automatically. Drag to pan, scroll to zoom.</p>
+<div class="card"><input id="eq" autocomplete="off" placeholder="Type y=mx+b or an inequality like y>2x-1, then press Enter" style="background:#000;color:#fff;border-color:#444;font-size:17px;padding:12px 14px;margin-bottom:10px"><canvas id="gc"></canvas><div id="gi" class="sub" style="margin:8px 0 0">Hover the graph to read coordinates.</div></div>
+<div class="card"><div id="fns"></div><div class="row" id="params"></div><div class="row"><button id="addf">Add function</button><button id="gres">Reset view</button>
+<button id="anim">Animate sliders</button><button class="pri" id="roots">Find roots, intersections, critical points</button></div><div class="res" id="groots">Results appear here.</div></div></section>
+
+<section id="v-sci" hidden><h2>Basic calculator</h2><p class="sub">Type or tap the keys. Press Enter or = to calculate. Number pad on the right, scientific keys on the left.</p>
+<div class="card" style="max-width:780px"><input id="disp" placeholder="0" autocomplete="off"><div id="ans"></div>
+<div class="row"><button id="dm">Mode: DEG</button><button id="mc">MC</button><button id="mr">MR</button><button id="mp">M+</button><button id="mm">M−</button><button id="cp">Copy result</button></div>
+<div class="calc"><div class="fnp" id="fnp"></div><div class="keys" id="keys"></div></div></div>
+<div class="card"><b>History</b><div class="res" id="sh" style="margin-top:8px"></div></div></section>
+
+<section id="v-solve" hidden><h2>Equation solver &amp; calculus</h2><p class="sub">Solve equations (steps for linear and quadratic), simplify, differentiate, integrate numerically, take limits.</p>
+<div class="card"><div class="row"><label>Operation<select id="sop" style="width:100%;margin-top:3px"><option value="solve">Solve equation (use =)</option><option value="eval">Evaluate</option><option value="simp">Simplify</option><option value="der">Derivative</option><option value="int">Definite integral</option><option value="lim">Limit</option></select></label>
+<label style="flex:3">Expression or equation<input id="sin" value="2x + 5 = 17"></label></div>
+<div class="row"><label>Variable<input id="sv" value="x"></label><label>Order / a / point<input id="s1" value="1"></label><label>b (integral upper)<input id="s2" value="1"></label><button class="pri" id="sgo">Compute</button></div><div class="res" id="sout"></div></div></section>
+
+<section id="v-matrix" hidden><h2>Matrix &amp; vectors</h2><p class="sub">Use math.js syntax, e.g. [1,2;3,4] for a matrix and [1,2,3] for a vector.</p>
+<div class="card"><div class="row"><label>A<textarea id="ma">[2,1;1,3]</textarea></label><label>B<textarea id="mb">[1,0;0,1]</textarea></label></div>
+<div class="row" id="mops"></div><div class="res" id="mout"></div></div></section>
+
+<section id="v-stats" hidden><h2>Statistics &amp; probability</h2><p class="sub">Separate values with spaces, commas or new lines.</p>
+<div class="card"><div class="row"><label>Data (x)<textarea id="sx">4 8 15 16 23 42 15</textarea></label><label>Optional y values (regression)<textarea id="sy"></textarea></label></div><button class="pri" id="sgo2">Analyze</button><div class="res" id="stout" style="margin-top:10px"></div><div class="bars" id="hist" style="margin-top:10px"></div></div>
+<div class="card"><b>Probability</b><div class="row" style="margin-top:8px"><label>n<input id="pn" value="10"></label><label>r / k<input id="pk" value="3"></label><label>p<input id="pp" value="0.5"></label><label>Mean μ<input id="pm" value="0"></label><label>SD σ<input id="ps" value="1"></label><label>x<input id="px" value="1.96"></label><button class="pri" id="pgo">Compute</button></div><div class="res" id="pout"></div></div></section>
+
+<section id="v-geo" hidden><h2>Geometry calculator</h2><p class="sub">Formulas with your values substituted.</p><div class="card"><div class="row"><label>Shape<select id="gsh" style="width:100%;margin-top:3px"></select></label></div><div class="row" id="gin"></div><button class="pri" id="ggo">Calculate</button><div class="res" id="gout" style="margin-top:10px"></div></div></section>
+
+<section id="v-num" hidden><h2>Number theory</h2><p class="sub">Whole numbers only; arithmetic uses exact BigInt where it matters.</p><div class="card"><div class="row"><label>n<input id="nn" value="360"></label><label>a<input id="na" value="84"></label><label>b<input id="nb" value="36"></label><label>m (mod)<input id="nm" value="13"></label><button class="pri" id="ngo">Compute</button></div><div class="res" id="nout"></div></div></section>
+
+<section id="v-unit" hidden><h2>Unit converter</h2><div class="card"><div class="row"><label>Category<select id="uc" style="width:100%;margin-top:3px"></select></label><label>Value<input id="uv" value="1"></label><label>From<select id="uf" style="width:100%;margin-top:3px"></select></label><label>To<select id="ut" style="width:100%;margin-top:3px"></select></label></div><div class="res" id="uout"></div></div></section>
+
+<section id="v-fin" hidden><h2>Financial calculator</h2><div class="card"><b>Compound interest</b><div class="row" style="margin-top:8px"><label>Principal<input id="fp" value="10000"></label><label>Rate %<input id="fr" value="5"></label><label>Times/yr<input id="fn" value="12"></label><label>Years<input id="fy" value="10"></label></div>
+<b>Loan</b><div class="row" style="margin-top:8px"><label>Loan amount<input id="lp" value="250000"></label><label>Rate % (yearly)<input id="lr" value="6.5"></label><label>Years<input id="ly" value="30"></label></div>
+<b>Percentage change</b><div class="row" style="margin-top:8px"><label>Old<input id="co" value="80"></label><label>New<input id="cn" value="100"></label><button class="pri" id="fgo">Compute all</button></div><div class="res" id="fout"></div></div></section>
+
+<section id="v-trig" hidden><h2>Trigonometry</h2><p class="sub">Values, exact special angles, a live unit circle, and a triangle solver.</p>
+<div class="card"><div class="row"><label>Angle<input id="ta" value="30"></label><label>Unit<select id="tu" style="width:100%;margin-top:3px"><option value="d">degrees</option><option value="r">radians</option></select></label><label>Value for inverse functions<input id="ti" value="0.5"></label></div>
+<div class="row" style="align-items:flex-start"><div style="flex:2;min-width:240px"><div class="res" id="tout"></div></div><canvas id="uc2" width="260" height="260" style="flex:1;max-width:260px;min-width:180px"></canvas></div></div>
+<div class="card"><b>Triangle solver</b><p class="sub" style="margin:4px 0 8px">Enter any three values, including at least one side. Angles are in degrees; angle A is opposite side a.</p><div class="row" id="tri"><label>a<input></label><label>b<input></label><label>c<input></label><label>A°<input></label><label>B°<input></label><label>C°<input></label><button class="pri" id="trg">Solve</button></div><div class="res" id="triout"></div></div></section>
+<section id="v-seq" hidden><h2>Sequences and series</h2><div class="card"><div class="row"><label>Type<select id="qt" style="width:100%;margin-top:3px"><option value="a">Arithmetic</option><option value="g">Geometric</option><option value="f">Fibonacci</option></select></label><label>First term a₁<input id="q1" value="2"></label><label>Difference d or ratio r<input id="q2" value="3"></label><label>n<input id="qn" value="10"></label><button class="pri" id="qgo">Compute</button></div><div class="res" id="qout"></div></div>
+<div class="card"><b>Summation Σ</b><div class="row" style="margin-top:8px"><label>Expression in k<input id="ske" value="k^2"></label><label>From<input id="skf" value="1"></label><label>To<input id="skt" value="100"></label><button class="pri" id="skgo">Sum</button></div><div class="res" id="skout"></div></div></section>
+<section id="v-poly" hidden><h2>Polynomials</h2><p class="sub">Write a polynomial in x, like x^3-6x^2+11x-6 (up to degree 10).</p><div class="card"><div class="row"><label style="flex:3">p(x)<input id="p1" value="x^3-6x^2+11x-6"></label><button class="pri" id="polgo">Roots and factoring</button></div><div class="row"><label style="flex:3">Divisor d(x)<input id="p2" value="x-1"></label><button id="pdv">Divide p ÷ d</button></div><div class="res" id="pol"></div></div></section>
+<section id="v-sys" hidden><h2>Systems of equations</h2><p class="sub">One linear equation per line, with any variable names.</p><div class="card"><textarea id="sy1" style="min-height:110px">2x + y = 5
+x - y = 1</textarea><div class="row" style="margin-top:8px"><button class="pri" id="sysgo">Solve system</button></div><div class="res" id="syout"></div></div></section>
+<section id="v-logic" hidden><h2>Logic and sets</h2><div class="card"><b>Truth table</b><div class="row" style="margin-top:8px"><label style="flex:3">Expression (and, or, not, xor)<input id="lg" value="(A and B) or not C"></label><button class="pri" id="lgo">Build table</button></div><div class="res" id="lgout"></div></div>
+<div class="card"><b>Set operations</b><div class="row" style="margin-top:8px"><label>Set A<input id="sa" value="1, 2, 3, 4"></label><label>Set B<input id="sb" value="3, 4, 5"></label><button class="pri" id="setgo">Compute</button></div><div class="res" id="setout"></div></div></section>
+<section id="v-ref" hidden><h2>Formula reference</h2><p class="sub">Search, then click a formula to copy it.</p><input id="fq" placeholder="Search formulas, e.g. circle or derivative"><div id="fl" style="margin-top:12px"></div></section>
+<section id="v-html" hidden><h2>HTML, CSS and JavaScript editor</h2><p class="sub">Edit the three tabs. The preview updates as you type, and console output appears under it.</p>
+<div class="ed"><div class="card"><div class="row"><button data-t="h" class="on">HTML</button><button data-t="c">CSS</button><button data-t="j">JavaScript</button><span style="flex:1"></span><button id="hrun" class="pri">Run</button></div>
+<textarea id="e-h" spellcheck="false"></textarea><textarea id="e-c" spellcheck="false" hidden></textarea><textarea id="e-j" spellcheck="false" hidden></textarea>
+<div class="row" style="margin:8px 0 0"><button id="hcp">Copy as one HTML file</button><button id="hcpt">Copy this tab</button><button id="hrs">Reset</button></div></div>
+<div class="card"><iframe id="hf" sandbox="allow-scripts allow-modals" title="Preview"></iframe><div class="res" id="hcon" style="margin-top:8px;max-height:120px;overflow:auto"></div></div></div></section>
+<section id="v-py" hidden><h2>Python editor</h2><p class="sub">Runs real Python in your browser with Pyodide. The first run downloads the Python runtime, so it needs an internet connection. Press Ctrl+Enter (Cmd+Enter on Mac) to run. Packages such as numpy load automatically when you import them; input() is not supported.</p>
+<div class="card"><textarea id="pyc" spellcheck="false" style="min-height:280px;white-space:pre;tab-size:4"></textarea><div class="row" style="margin-top:8px"><button class="pri" id="pyrun">Run</button><button id="pyclr">Clear output</button><button id="pycp">Copy code</button><span class="sub" id="pyst" style="margin:0"></span></div><div class="res" id="pyout"></div></div></section>
+
+<section id="v-pdf" hidden><h2><i class="fa-solid fa-file-pdf" style="color:var(--a);margin-right:10px"></i>PDF Merger & Splitter</h2><p class="sub">Combine PDFs or extract a page range into a new PDF. Processing happens in your browser.</p><div class="card"><label>PDF files to merge (select multiple)<input id="pdfFiles" type="file" accept="application/pdf" multiple></label><div class="row" style="margin-top:10px"><button class="pri" id="pdfMerge">Merge PDFs</button></div><hr style="border-color:var(--ln);margin:18px 0"><label>PDF to split<input id="pdfSplitFile" type="file" accept="application/pdf"></label><div class="row"><label>Pages to extract (e.g. 1-3,5)<input id="pdfPages" placeholder="1-3,5"></label><button class="pri" id="pdfSplit">Extract pages</button></div><div class="res" id="pdfOut">Choose PDF files to begin.</div></div></section>
+<section id="v-image" hidden><h2><i class="fa-solid fa-image" style="color:var(--a);margin-right:10px"></i>Image Compressor & Resizer</h2><p class="sub">Resize an image and export it as JPEG, PNG, or WebP.</p><div class="card"><label>Choose image<input id="imgFile" type="file" accept="image/*"></label><div class="row" style="margin-top:10px"><label>Width (px)<input id="imgW" type="number" min="1" placeholder="Original width"></label><label>Height (px)<input id="imgH" type="number" min="1" placeholder="Original height"></label><label>Quality <span id="imgQVal">80%</span><input id="imgQ" type="range" min="10" max="100" value="80"></label></div><div class="row"><label>Format<select id="imgFmt"><option value="image/webp">WebP</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option></select></label><button class="pri" id="imgGo">Convert & Download</button></div><img id="imgPreview" alt="Selected image preview" style="display:none;max-width:100%;max-height:300px;border-radius:10px"><div class="res" id="imgOut">Select an image to view its dimensions.</div></div></section>
+<section id="v-md" hidden><h2><i class="fa-brands fa-markdown" style="color:var(--a);margin-right:10px"></i>Markdown Editor</h2><p class="sub">Write Markdown and preview headings, lists, links, code, and emphasis live.</p><div class="ed"><div class="card"><textarea id="mdInput" style="min-height:360px" spellcheck="false"># Hello!\n\nWrite **Markdown** here.\n\n- First item\n- Second item\n\n`inline code`</textarea></div><div class="card"><b>Live preview</b><div id="mdPreview" style="padding:12px;overflow-wrap:anywhere"></div></div></div></section>
+<section id="v-csv" hidden><h2><i class="fa-solid fa-file-csv" style="color:var(--a);margin-right:10px"></i>CSV & JSON Converter</h2><p class="sub">Convert CSV rows into JSON objects, or convert JSON arrays back to CSV.</p><div class="card"><label>Input<textarea id="csvInput" style="min-height:190px" placeholder="name,age\nAlex,22\nSam,25"></textarea></label><div class="row" style="margin-top:10px"><button class="pri" id="csvToJson">CSV → JSON</button><button id="jsonToCsv">JSON → CSV</button><button id="csvDownload">Download result</button></div><div class="res" id="csvOutput"></div></div></section>
+
+<section id="v-regex" hidden><h2><i class="fa-solid fa-code" style="color:var(--a);margin-right:10px"></i>Regex Tester</h2><p class="sub">Test a JavaScript regular expression against text and inspect all matches.</p><div class="card"><div class="row"><label>Pattern<input id="rxPattern" value="\\b(cat|dog)\\b" spellcheck="false"></label><label>Flags<input id="rxFlags" value="gi" maxlength="6"></label></div><label>Test text<textarea id="rxText" style="min-height:150px">The cat saw a dog. Another CAT came by.</textarea></label><button class="pri" id="rxRun" style="margin-top:10px">Test regex</button><div class="res" id="rxOut" style="margin-top:10px"></div></div></section>
+<section id="v-uuid" hidden><h2><i class="fa-solid fa-fingerprint" style="color:var(--a);margin-right:10px"></i>UUID Generator</h2><p class="sub">Generate random UUID v4 identifiers.</p><div class="card"><div class="row"><label>How many<input id="uuidCount" type="number" min="1" max="100" value="5"></label><button class="pri" id="uuidGo">Generate UUIDs</button><button id="uuidCopy">Copy results</button></div><div class="res" id="uuidOut"></div></div></section>
+<section id="v-gradient" hidden><h2><i class="fa-solid fa-palette" style="color:var(--a);margin-right:10px"></i>CSS Gradient Generator</h2><p class="sub">Build a linear gradient and copy the CSS.</p><div class="card"><div class="row"><label>First color<input type="color" id="gradA" value="#f2b84b"></label><label>Second color<input type="color" id="gradB" value="#56c7b0"></label><label>Angle<input type="range" id="gradAngle" min="0" max="360" value="135"><span id="gradAngleVal">135°</span></label></div><div id="gradPreview" style="height:170px;border-radius:12px;border:1px solid var(--ln);margin:12px 0"></div><div class="row"><input id="gradCode" readonly><button class="pri" id="gradCopy">Copy CSS</button></div></div></section>
+<section id="v-shadow" hidden><h2><i class="fa-solid fa-square" style="color:var(--a);margin-right:10px"></i>Box Shadow Generator</h2><p class="sub">Adjust a shadow and copy the CSS declaration.</p><div class="card"><div class="row"><label>Horizontal offset<input id="shX" type="range" min="-50" max="50" value="8"></label><label>Vertical offset<input id="shY" type="range" min="-50" max="50" value="12"></label></div><div class="row"><label>Blur<input id="shBlur" type="range" min="0" max="100" value="24"></label><label>Spread<input id="shSpread" type="range" min="-30" max="50" value="0"></label><label>Opacity<input id="shOpacity" type="range" min="0" max="100" value="25"></label></div><div id="shadowPreview" style="height:180px;display:grid;place-items:center;margin:15px"><div style="width:130px;height:90px;background:var(--p2);border:1px solid var(--ln);border-radius:12px"></div></div><div class="row"><input id="shadowCode" readonly><button class="pri" id="shadowCopy">Copy CSS</button></div></div></section>
+<section id="v-filesize" hidden><h2><i class="fa-solid fa-hard-drive" style="color:var(--a);margin-right:10px"></i>File Size Converter</h2><p class="sub">Convert between decimal and binary storage units.</p><div class="card"><div class="row"><label>Value<input id="fsValue" type="number" min="0" value="1024"></label><label>From<select id="fsFrom"><option value="1">Bytes (B)</option><option value="1000">KB (decimal)</option><option value="1000000">MB (decimal)</option><option value="1000000000">GB (decimal)</option><option value="1024">KiB (binary)</option><option value="1048576">MiB (binary)</option><option value="1073741824">GiB (binary)</option><option value="1099511627776">TiB (binary)</option></select></label></div><div class="res" id="fsOut"></div></div></section>
+<section id="v-diff" hidden><h2><i class="fa-solid fa-code-compare" style="color:var(--a);margin-right:10px"></i>Text Diff Checker</h2><p class="sub">Compare two texts line by line to see what was added, removed, or kept.</p><div class="card"><div class="row"><label>Original text<textarea id="diffA" style="min-height:180px"></textarea></label><label>New text<textarea id="diffB" style="min-height:180px"></textarea></label></div><button class="pri" id="diffGo">Compare texts</button><div id="diffOut" class="res" style="margin-top:10px"></div></div></section>
+<section id="v-bill" hidden><h2><i class="fa-solid fa-receipt" style="color:var(--a);margin-right:10px"></i>Split Bill Calculator</h2><p class="sub">Split a bill evenly, including tax and tip.</p><div class="card"><div class="row"><label>Bill subtotal ($)<input id="billSubtotal" type="number" min="0" step="0.01" value="60"></label><label>Tax (%)<input id="billTax" type="number" min="0" step="0.1" value="8"></label><label>Tip (%)<input id="billTip" type="number" min="0" step="0.5" value="18"></label><label>People<input id="billPeople" type="number" min="1" step="1" value="3"></label></div><button class="pri" id="billGo">Calculate split</button><div class="res" id="billOut" style="margin-top:10px"></div></div></section>
+<section id="v-jsoncsv" hidden><h2><i class="fa-solid fa-table" style="color:var(--a);margin-right:10px"></i>JSON to CSV</h2><p class="sub">Convert an array of JSON objects into a downloadable CSV file.</p><div class="card"><label>JSON array<textarea id="jsonCsvInput" style="min-height:190px">[{"name":"Alex","age":22},{"name":"Sam","age":25}]</textarea></label><div class="row" style="margin-top:10px"><button class="pri" id="jsonCsvGo">Convert to CSV</button><button id="jsonCsvDownload">Download CSV</button></div><div class="res" id="jsonCsvOut"></div></div></section>
+
+<section id="v-imageformat" hidden><h2><i class="fa-solid fa-file-image" style="color:var(--a);margin-right:10px"></i>Image Format Converter</h2><p class="sub">Convert an image to PNG, JPEG, or WebP using your browser.</p><div class="card"><label>Choose image<input id="ifFile" type="file" accept="image/*"></label><div class="row" style="margin-top:10px"><label>Output format<select id="ifFormat"><option value="image/png">PNG</option><option value="image/jpeg">JPEG</option><option value="image/webp">WebP</option></select></label><button class="pri" id="ifGo">Convert & Download</button></div><div class="res" id="ifOut">Choose an image to convert.</div></div></section>
+<section id="v-contrast" hidden><h2><i class="fa-solid fa-circle-half-stroke" style="color:var(--a);margin-right:10px"></i>Color Contrast Checker</h2><p class="sub">Check text contrast against WCAG readability guidelines.</p><div class="card"><div class="row"><label>Text color<input id="conText" type="color" value="#ffffff"></label><label>Background color<input id="conBg" type="color" value="#15171b"></label></div><div id="conPreview" style="padding:28px;border-radius:10px;font-size:22px;font-weight:700;margin-bottom:12px">Sample text preview</div><div class="res" id="conOut"></div></div></section>
+
+<section id="v-settings" hidden><h2>Settings</h2><p class="sub">Changes apply instantly and are remembered in this browser.</p>
+<div class="card"><b>Dark mode</b><div class="row" style="margin:10px 0 16px" id="modes"><button data-m="light">Light</button><button data-m="dark">Dark</button></div>
+<b>Theme color</b><p class="sub" style="margin:4px 0 10px">Pick any color you like, or type a hex code such as #ff5733.</p>
+<div class="row"><input type="color" id="cc" aria-label="Pick a theme color"><input id="hx" placeholder="#f2b84b" maxlength="7" aria-label="Hex color code" spellcheck="false"></div>
+<div class="row" id="accents"></div>
+<hr style="border-color:var(--ln);margin:18px 0">
+<b>Cursor effect</b>
+<p class="sub" style="margin:4px 0 10px">Turn the iPad-style cursor effect on or off. The cursor automatically changes contrast for light and dark mode.</p>
+<label style="display:flex;align-items:center;gap:9px;color:var(--t);cursor:pointer"><input type="checkbox" id="cursorEnabled" style="width:auto" checked> Enable iPad-style cursor</label>
+</div></section>
+<section id="v-wc" hidden><h2>Word counter</h2><p class="sub">Paste or type text to see live counts.</p><div class="card"><textarea id="wci" style="min-height:200px" placeholder="Type or paste your text here…"></textarea><div class="res" id="wco" style="margin-top:10px"></div></div></section>
+<section id="v-case" hidden><h2>Case converter</h2><p class="sub">Paste text, then tap a style. The result appears below.</p><div class="card"><textarea id="csi" style="min-height:140px" placeholder="Your text…"></textarea><div class="row" id="csb" style="margin-top:10px"></div><div class="res" id="cso"></div></div></section>
+<section id="v-notes" hidden><h2>Notes</h2><p class="sub">A scratchpad that saves automatically in this browser.</p><div class="card"><div class="notes-toolbar" role="toolbar" aria-label="Text formatting">
+<select id="ntstyle" aria-label="Paragraph style"><option value="p">Normal text</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="blockquote">Quote</option><option value="pre">Code</option></select>
+<select id="ntfont" aria-label="Font"><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option><option value="Courier New">Courier New</option><option value="Verdana">Verdana</option><option value="system-ui">System</option></select>
+<button type="button" data-cmd="bold" aria-label="Bold" title="Bold"><b>B</b></button><button type="button" data-cmd="italic" aria-label="Italic" title="Italic"><i>I</i></button><button type="button" data-cmd="underline" aria-label="Underline" title="Underline"><u>U</u></button><button type="button" data-cmd="strikeThrough" aria-label="Strikethrough" title="Strikethrough"><s>S</s></button>
+<label class="nt-color" title="Text color">A <input id="ntcolor" type="color" value="#222222" aria-label="Text color"></label><label class="nt-color" title="Highlight color">🖍 <input id="nthighlight" type="color" value="#fff176" aria-label="Highlight color"></label>
+<button type="button" id="ntlink" title="Insert link" aria-label="Insert link">🔗</button><button type="button" data-cmd="justifyLeft" title="Align left" aria-label="Align left">☰</button><button type="button" data-cmd="justifyCenter" title="Center" aria-label="Center">≡</button><button type="button" data-cmd="justifyRight" title="Align right" aria-label="Align right">☷</button><button type="button" data-cmd="insertUnorderedList" title="Bulleted list" aria-label="Bulleted list">• List</button><button type="button" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">1. List</button><button type="button" data-cmd="outdent" title="Decrease indent" aria-label="Decrease indent">⇤</button><button type="button" data-cmd="indent" title="Increase indent" aria-label="Increase indent">⇥</button><button type="button" id="ntclear" title="Clear formatting" aria-label="Clear formatting">Tx</button></div>
+<div id="nt" contenteditable="true" role="textbox" aria-label="Notes editor" aria-multiline="true" data-placeholder="Start typing…" spellcheck="true"></div><div class="row" style="margin:10px 0 0"><button id="ntcp">Copy all</button><button id="ntdl">Download .txt</button><span class="sub" id="nts" style="margin:0"></span></div></div></section>
+<section id="v-json" hidden><h2>JSON formatter</h2><p class="sub">Format, minify or validate JSON.</p><div class="card"><textarea id="ji" style="min-height:200px" spellcheck="false" placeholder='{"name":"example","list":[1,2,3]}'></textarea><div class="row" style="margin-top:10px"><button class="pri" data-j="f">Format</button><button data-j="m">Minify</button><button data-j="v">Validate</button><label style="flex:0 0 auto">Indent <select id="jin" style="margin-left:6px"><option>2</option><option>4</option><option value="tab">Tab</option></select></label></div><div class="res" id="jo"></div></div></section>
+<section id="v-enc" hidden><h2>Encode &amp; decode</h2><p class="sub">Base64, URL and HTML encoding, with full Unicode support.</p><div class="card"><textarea id="ei" style="min-height:140px" placeholder="Text to convert…"></textarea><div class="row" id="eb" style="margin-top:10px"><button data-e="b64e">Base64 encode</button><button data-e="b64d">Base64 decode</button><button data-e="ue">URL encode</button><button data-e="ud">URL decode</button><button data-e="he">HTML escape</button><button data-e="hd">HTML unescape</button></div><div class="res" id="eo"></div></div></section>
+<section id="v-pw" hidden><h2>Password generator</h2><p class="sub">Passwords are made in your browser with secure random numbers and are never sent anywhere.</p><div class="card"><div class="row"><label>Length: <b id="pwl">16</b><input type="range" id="pwn" min="6" max="64" value="16"></label><label>How many<input id="pwc" type="number" min="1" max="20" value="5"></label></div><div class="row"><label style="flex:0 0 auto"><input type="checkbox" id="pwu" checked style="width:auto;margin:0 4px 0 0"> A–Z</label><label style="flex:0 0 auto"><input type="checkbox" id="pwlw" checked style="width:auto;margin:0 4px 0 0"> a–z</label><label style="flex:0 0 auto"><input type="checkbox" id="pwd" checked style="width:auto;margin:0 4px 0 0"> 0–9</label><label style="flex:0 0 auto"><input type="checkbox" id="pws" checked style="width:auto;margin:0 4px 0 0"> Symbols</label><label style="flex:0 0 auto"><input type="checkbox" id="pwx" style="width:auto;margin:0 4px 0 0"> Skip look-alikes (O, 0, I, l, 1)</label></div><button class="pri" id="pwg">Generate</button><div class="res" id="pwr" style="margin-top:10px"></div><p class="sub" id="pwb" style="margin:8px 0 0"></p></div></section>
+<section id="v-rnd" hidden><h2>Random picker</h2><div class="card"><b>Dice and coin</b><div class="row" style="margin-top:8px"><label>Dice<input id="rdn" type="number" min="1" max="50" value="2"></label><label>Sides<input id="rds" type="number" min="2" max="1000" value="6"></label><button class="pri" id="rdg">Roll</button><button id="rcf">Flip a coin</button></div>
+<b>Random number</b><div class="row" style="margin-top:8px"><label>Min<input id="rmn" type="number" value="1"></label><label>Max<input id="rmx" type="number" value="100"></label><button class="pri" id="rng">Generate</button></div>
+<b>Pick from a list</b><div class="row" style="margin-top:8px"><textarea id="rli" placeholder="One option per line" style="min-height:110px">Pizza
+Tacos
+Sushi</textarea></div><div class="row"><button class="pri" id="rpk">Pick one</button><button id="rsh">Shuffle list</button></div><div class="res" id="rro"></div></div></section>
+<section id="v-color" hidden><h2>Color tools</h2><p class="sub">Pick a color or type a code to convert it and build a palette. Click a swatch to copy its hex.</p><div class="card"><div class="row"><input type="color" id="kc" value="#3b82f6" style="width:70px;height:46px;padding:2px;cursor:pointer"><label style="flex:2">Color code (hex, rgb() or hsl())<input id="kt" value="#3b82f6" spellcheck="false"></label></div><div class="res" id="ko"></div><div id="kp" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:12px"></div></div></section>
+<section id="v-timer" hidden><h2>Timer &amp; stopwatch</h2><div class="card"><b>Countdown</b><div class="row" style="margin-top:8px"><label>Minutes<input id="tmm" type="number" min="0" value="5"></label><label>Seconds<input id="tms" type="number" min="0" max="59" value="0"></label><button class="pri" id="tmg">Start</button><button id="tmr">Reset</button></div><div id="tmd" style="font:44px ui-monospace,monospace;margin:4px 0 2px">05:00</div></div>
+<div class="card"><b>Stopwatch</b><div id="swd" style="font:44px ui-monospace,monospace;margin:8px 0">00:00.00</div><div class="row"><button class="pri" id="swg">Start</button><button id="swl">Lap</button><button id="swr">Reset</button></div><div class="res" id="swo">Laps appear here.</div></div></section>
+<section id="v-date" hidden><h2>Date calculator</h2><div class="card"><b>Days between two dates</b><div class="row" style="margin-top:8px"><label>From<input type="date" id="d1"></label><label>To<input type="date" id="d2"></label><button class="pri" id="dbg">Calculate</button></div>
+<b>Add or subtract days</b><div class="row" style="margin-top:8px"><label>Start date<input type="date" id="d3"></label><label>Days (negative to subtract)<input id="d4" type="number" value="30"></label><button class="pri" id="dag">Calculate</button></div>
+<b>Age</b><div class="row" style="margin-top:8px"><label>Birth date<input type="date" id="d5"></label><button class="pri" id="dgg">Calculate</button></div><div class="res" id="dto"></div></div></section>
+<section id="v-prac" hidden><h2>Math practice</h2><div class="card"><div class="row"><label>Topic<select id="pt" style="width:100%;margin-top:3px"><option value="arith">Arithmetic</option><option value="lin">Linear equations</option><option value="der">Derivatives</option></select></label><label>Difficulty<select id="pd" style="width:100%;margin-top:3px"><option value="1">Easy</option><option value="2">Medium</option><option value="3">Hard</option></select></label><button id="pnew" class="pri">New question</button></div>
+<div id="pq" style="font:22px Georgia,serif;margin:10px 0">Press “New question”.</div><div class="row"><input id="pa" placeholder="Your answer (fractions like 3/4 work)" style="flex:2"><button id="pchk">Check</button><button id="phint">Hint</button></div><div class="res" id="pres"></div><p class="sub" id="psc"></p></div></section>
+
+
+</main>
+<script>
+function copy(t,b){const done=()=>{if(b){const o=b.innerHTML;b.innerHTML='Copied';setTimeout(()=>b.innerHTML=o,1300)}};const fb=()=>{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;inset:8% 6%;z-index:99;width:88%;height:80%';document.body.append(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}if(ok){a.remove();done()}else a.onblur=()=>a.remove()};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done,fb);else fb()}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const S={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const fmt=v=>{if(typeof v==='number')return isFinite(v)?String(+v.toPrecision(12)):(isNaN(v)?'undefined':v>0?'∞':'-∞');try{return math.format(v,{precision:12})}catch(e){return String(v)}};
+const nice=v=>{if(typeof v!=='number'||!isFinite(v))return fmt(v);try{const f=math.fraction(v);if(f.d>1&&f.d<=1000)return (f.s<0?'-':'')+f.n+'/'+f.d+'  ≈ '+fmt(v)}catch(e){}return fmt(v)};
+const log=()=>{};
+const bad=(el,e)=>{$(el).innerHTML='<span class="err">'+String(e.message||e).replace(/</g,'&lt;')+'</span>'};
+const num=id=>{const v=math.evaluate($(id).value);if(typeof v!=='number'||!isFinite(v))throw Error('Enter a valid number in '+id);return v};
+/* ---------- navigation ---------- */
+const T=[['sci','Basic calculator','Everyday and scientific keys, DEG/RAD, memory'],['graph','Graphing calculator','Plot functions, roots, sliders'],['solve','Equation solver & calculus','Solve, simplify, d/dx, ∫, limits'],['matrix','Matrix & vectors','det, inverse, rref, eigen'],['stats','Statistics & probability','Descriptives, regression, distributions'],['geo','Geometry','Areas, volumes, distance'],['num','Number theory','Primes, gcd, lcm, modular'],['unit','Unit converter','Length to pressure'],['fin','Financial','Interest, loans, % change'],['trig','Trigonometry','Unit circle, triangle solver, inverses'],['seq','Sequences & series','Arithmetic, geometric, Fibonacci, Σ'],['poly','Polynomials','Roots, factoring, long division'],['sys','Systems of equations','Linear systems with row reduction'],['logic','Logic & sets','Truth tables and set operations'],['ref','Formula reference','Searchable, click a formula to copy'],['html','HTML, CSS & JS editor','Three tabs with live preview'],['py','Python editor','Run Python in your browser'],['prac','Math practice','Generated questions with checking'],['wc','Word counter','Words, characters, reading time'],['case','Case converter','UPPER, Title, camelCase, snake_case and more'],['notes','Notes','A scratchpad that saves as you type'],['json','JSON formatter','Format, minify and validate JSON'],['enc','Encode & decode','Base64, URL and HTML encoding'],['pw','Password generator','Strong random passwords'],['rnd','Random picker','Dice, coins, numbers, pick from a list'],['color','Color tools','Converter, palette and contrast'],['timer','Timer & stopwatch','Countdown and stopwatch with laps'],['date','Date calculator','Days between, add days, age'],['pdf','PDF merger & splitter','Combine PDFs or extract pages'],['image','Image compressor & resizer','Resize and compress images'],['md','Markdown editor','Write Markdown with live preview'],['csv','CSV & JSON converter','Convert tabular data'],['regex','Regex tester','Test regular expressions'],['uuid','UUID generator','Generate unique identifiers'],['gradient','CSS gradient generator','Build CSS gradients'],['shadow','Box shadow generator','Design CSS shadows'],['filesize','File size converter','Convert storage units'],['diff','Text diff checker','Compare two texts'],['bill','Split bill calculator','Split a bill with tax and tip'],['jsoncsv','JSON to CSV','Convert JSON arrays to CSV'],['imageformat','Image format converter','Convert PNG, JPEG and WebP'],['contrast','Color contrast checker','Check WCAG text contrast'],['settings','Settings','Theme color and dark mode']];
+const GR=[['math','Math',['sci','graph','solve','matrix','stats','geo','num','unit','fin','trig','seq','poly','sys','logic','ref','prac']],['code','Code',['html','py','json','enc','md','csv','jsoncsv','regex','uuid','gradient','shadow','diff']],['text','Text',['wc','case','notes']],['every','Everyday',['pw','rnd','color','timer','date','pdf','image','imageformat','filesize','bill','contrast']]];
+const TT=Object.fromEntries(T.map(t=>[t[0],t])),grpOf=k=>(GR.find(g=>g[2].includes(k))||[])[0];
+let openG=S.get('ng',{math:0,code:0,text:0,every:0});
+// Start with the Math dropdown collapsed on every launch, even if it was left open previously.
+openG.math=0;S.set('ng',openG);
+const GI={math:'fa-square-root-variable',code:'fa-code',text:'fa-font',every:'fa-toolbox'};
+$('#nav').innerHTML='<h1>Bonfyre</h1><a data-v="home" class="top-l"><i class="fa-solid fa-fire-flame-curved"></i>Bonfyre</a>'+GR.map(g=>`<div class="grp" data-g="${g[0]}"><button class="gh" data-g="${g[0]}" aria-expanded="false"><span><i class="fa-solid ${GI[g[0]]}"></i>${g[1]}</span><span class="car"></span></button><div class="gb">${g[2].map(k=>`<a data-v="${k}">${TT[k][1]}</a>`).join('')}</div></div>`).join('')+'<a data-v="settings" class="top-l"><i class="fa-solid fa-gear"></i>Settings</a>';
+function syncG(){$$('.grp').forEach(d=>{const o=!!openG[d.dataset.g];d.classList.toggle('open',o);d.querySelector('.gh').setAttribute('aria-expanded',o)})}
+function show(v){if(!document.getElementById('v-'+v))v='settings';const g=grpOf(v);if(g&&!openG[g]){openG[g]=1;S.set('ng',openG)}syncG();$$('section').forEach(s=>s.hidden=s.id!=='v-'+v);$$('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));if(v==='graph')setTimeout(gdraw,0);if(v==='sci')shr()}
+$('#nav').onclick=e=>{const h=e.target.closest('.gh');if(h){const g=h.dataset.g;openG[g]=openG[g]?0:1;S.set('ng',openG);syncG();return}const a=e.target.closest('a');if(a)location.hash=a.dataset.v};
+addEventListener('hashchange',()=>show(location.hash.slice(1)||'home'));
+/* ---------- settings: dark mode and theme color ---------- */
+const PRE=[['Amber','#f2b84b'],['Ocean','#5aa9ff'],['Rose','#ff7a9c'],['Forest','#7bd88f'],['Violet','#b794f6'],['Coral','#ff6f4d'],['Mint','#3ddc97'],['Sky','#38bdf8']];
+const OLD={amber:'#f2b84b',ocean:'#5aa9ff',rose:'#ff7a9c',forest:'#7bd88f',violet:'#b794f6'};
+let mode=S.get('mode','dark'),acc=S.get('accent','#f2b84b');if(mode!=='light')mode='dark';if(OLD[acc])acc=OLD[acc];if(!/^#[0-9a-f]{6}$/i.test(acc))acc='#f2b84b';acc=acc.toLowerCase();
+function hsl(hex){const [r,g,b]=[1,3,5].map(i=>parseInt(hex.substr(i,2),16)/255),mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return[h,s,l]}
+function applyTheme(){const light=mode==='light',r=document.documentElement;let [h,s,l]=hsl(acc);
+/* keep the chosen color readable on the current background */
+l=light?Math.min(l,.45):Math.max(l,.45);const bl=light?.34:.6,bh=h,bs=Math.max(s,.45);
+const A=`hsl(${h.toFixed(1)} ${(s*100).toFixed(1)}% ${(l*100).toFixed(1)}%)`,B=`hsl(${bh.toFixed(1)} ${(bs*100).toFixed(1)}% ${(bl*100).toFixed(1)}%)`;
+r.dataset.theme=light?'light':'dark';r.style.setProperty('--a',A);r.style.setProperty('--b',B);r.style.setProperty('--on',l>.58?'#15171b':'#ffffff');
+$$('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));$$('[data-a]').forEach(b=>b.classList.toggle('on',b.dataset.a===acc));
+$('#cc').value=acc;if(document.activeElement!==$('#hx'))$('#hx').value=acc;try{gdraw();trig()}catch(e){}}
+$('#accents').innerHTML=PRE.map(([n,c])=>`<button data-a="${c}"><span class="sw" style="background:${c}"></span>${n}</button>`).join('');
+$('#modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b){mode=b.dataset.m;S.set('mode',mode);applyTheme()}};
+$('#accents').onclick=e=>{const b=e.target.closest('[data-a]');if(b){acc=b.dataset.a;S.set('accent',acc);applyTheme()}};
+$('#cc').oninput=e=>{acc=e.target.value.toLowerCase();S.set('accent',acc);applyTheme()};
+$('#hx').oninput=e=>{let v=e.target.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){acc=v.toLowerCase();S.set('accent',acc);applyTheme()}};
+$('#hx').onblur=()=>{$('#hx').value=acc};
+const cursorSetting=$('#cursorEnabled');
+let cursorEnabled=S.get('cursorEnabled',true)!==false;
+cursorSetting.checked=cursorEnabled;
+cursorSetting.onchange=()=>{cursorEnabled=cursorSetting.checked;S.set('cursorEnabled',cursorEnabled);if(typeof window.setBonfyreCursorEnabled==='function')window.setBonfyreCursorEnabled(cursorEnabled)};
+applyTheme();
+/* ---------- graphing ---------- */
+const COL=['#f2b84b','#56c7b0','#ef6f6c','#8ab4ff','#c792ea','#9be564'];
+const G={cx:0,cy:0,s:40,p:{},f:S.get('gf',[{e:'y=mx+b',on:1},{e:'y<=-x^2/2+4',on:1}])};
+const CC={},pre=s=>s.replace(/[A-Za-z]+/g,t=>(t==='x'||t==='y'||t in math||t.length===1)?t:t.split('').join('*'));
+const comp=e=>{if(!(e in CC))CC[e]=build(e);return CC[e]};
+function build(e){e=e.trim();if(!e)return null;try{const m=e.match(/^(.*?)(<=|>=|≤|≥|<|>|=)(.*)$/),C=s=>math.compile(pre(s));let o,ss;
+if(!m){ss=[e];o={k:'f',n:C(e)}}else{const op=m[2]==='≤'?'<=':m[2]==='≥'?'>=':m[2],L=m[1].trim(),R=m[3].trim();if(!L||!R)return null;ss=[L,R];const yl=/\by\b/.test(L),yr=/\by\b/.test(R);
+if(L==='y'&&!yr)o=op==='='?{k:'f',n:C(R)}:{k:'x',n:C(R),op};
+else if(R==='y'&&!yl)o=op==='='?{k:'f',n:C(L)}:{k:'x',n:C(L),op:op.replace('<','#').replace('>','<').replace('#','>')};
+else o={k:'g',L:C(L),R:C(R),op}}
+if(o.k==='x')o.strict=!o.op.includes('=');
+const nm=new Set();ss.forEach(s=>math.parse(pre(s)).traverse(nd=>{if(nd.isSymbolNode&&nd.name!=='x'&&nd.name!=='y'&&!(nd.name in math))nm.add(nd.name)}));o.pars=[...nm];return o}catch(x){return null}}
+let pk='';
+function gparams(){const s=new Set();G.f.forEach(f=>{if(f.on){const n=comp(f.e);if(n)n.pars.forEach(p=>s.add(p))}});const names=[...s].sort();names.forEach(p=>{if(!(p in G.p))G.p[p]=1});const k=names.join();if(k!==pk){pk=k;$('#params').innerHTML=names.map(p=>`<label>${p} = <b>${G.p[p]}</b><input type="range" data-n="${p}" min="-5" max="5" step="0.1" value="${G.p[p]}"></label>`).join('')||'<span class="sub">Extra letters you type (like m and b) get sliders automatically.</span>'}}
+const cmp=(op,l,r)=>op==='<'?l<r:op==='>'?l>r:op==='<='?l<=r:op==='>='?l>=r:false;
+function shade(x,n,col,w,h,Y){if(n.k==='f')return;x.save();x.fillStyle=col;x.globalAlpha=.22;
+if(n.k==='x'){const up=n.op[0]==='>';for(let px=0;px<w;px+=2){const py=Y(evf(n,G.cx+(px-w/2)/G.s));if(!isFinite(py))continue;const yy=Math.max(0,Math.min(h,py));up?x.fillRect(px,0,2,yy):x.fillRect(px,yy,2,h-yy)}}
+else if(n.op==='='){const c=3,cols=Math.ceil(w/c)+1,rows=Math.ceil(h/c)+1,D=[];for(let j=0;j<rows;j++){D.push([]);for(let i=0;i<cols;i++){const sc={x:G.cx+(i*c-w/2)/G.s,y:G.cy-(j*c-h/2)/G.s,...G.p};let d=NaN;try{d=n.L.evaluate(sc)-n.R.evaluate(sc)}catch(e){}D[j].push(typeof d==='number'?d:NaN)}}x.globalAlpha=1;for(let j=0;j<rows-1;j++)for(let i=0;i<cols-1;i++){const d=D[j][i];if(isFinite(d)&&Math.abs(d)<50&&(d*D[j][i+1]<0||d*D[j+1][i]<0))x.fillRect(i*c,j*c,2,2)}}
+else{const c=6;for(let py=0;py<h;py+=c)for(let px=0;px<w;px+=c){const sc={x:G.cx+(px+c/2-w/2)/G.s,y:G.cy-(py+c/2-h/2)/G.s,...G.p};let l,r;try{l=n.L.evaluate(sc);r=n.R.evaluate(sc)}catch(e){continue}if(typeof l==='number'&&typeof r==='number'&&cmp(n.op,l,r))x.fillRect(px,py,c,c)}}
+x.restore()}
+$('#eq').onkeydown=e=>{if(e.key!=='Enter')return;const v=e.target.value.trim();if(!v)return;if(!comp(v)){e.target.style.borderColor='var(--r)';$('#gi').textContent='Could not read that. Try y=mx+b or y>2x-1.';return}if(G.f.length>=6){$('#gi').textContent='Remove a function first (6 maximum).';return}e.target.style.borderColor='#444';G.f.push({e:v,on:1});e.target.value='';S.set('gf',G.f);fnui();gdraw()};
+const evf=(o,x)=>{if(o.k==='g')return NaN;try{const y=o.n.evaluate({x,...G.p});return typeof y==='number'?y:NaN}catch(e){return NaN}};
+function fnui(){$('#fns').innerHTML=G.f.map((f,i)=>`<div class="fn"><i style="background:${COL[i%6]}"></i><input type="checkbox" data-i="${i}" ${f.on?'checked':''} aria-label="Show"><span>y =</span><input data-i="${i}" value="${f.e.replace(/"/g,'&quot;')}"><button data-d="${i}">×</button></div>`).join('')}
+$('#fns').oninput=e=>{const i=e.target.dataset.i;if(i==null)return;if(e.target.type==='checkbox')G.f[i].on=e.target.checked?1:0;else{G.f[i].e=e.target.value;e.target.style.borderColor=!e.target.value.trim()||comp(e.target.value)?'':'var(--r)'}S.set('gf',G.f);gdraw()};
+$('#fns').onclick=e=>{const d=e.target.dataset.d;if(d!=null){G.f.splice(d,1);S.set('gf',G.f);fnui();gdraw()}};
+$('#addf').onclick=()=>{if(G.f.length<6){G.f.push({e:'',on:1});fnui()}};
+$('#gres').onclick=()=>{G.cx=G.cy=0;G.s=40;gdraw()};
+let anT=0;$('#params').oninput=e=>{const n=e.target.dataset.n;if(!n)return;G.p[n]=+e.target.value;e.target.previousElementSibling.textContent=G.p[n];gdraw()};
+$('#anim').onclick=()=>{if(anT){clearInterval(anT);anT=0;return}const d={};anT=setInterval(()=>{pk.split(',').filter(Boolean).forEach(k=>{let dd=d[k]||.1,v=G.p[k]+dd;if(v>5||v<-5){dd=-dd;v=G.p[k]+dd}d[k]=dd;G.p[k]=+v.toFixed(1);const el=document.querySelector(`#params input[data-n="${k}"]`);if(el){el.value=G.p[k];el.previousElementSibling.textContent=G.p[k]}});gdraw()},50)};
+function gdraw(){const c=$('#gc');if(!c.clientWidth)return;gparams();const dpr=devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+const cs=getComputedStyle(document.documentElement),gr=cs.getPropertyValue('--gr'),tx=cs.getPropertyValue('--m'),fg=cs.getPropertyValue('--t');
+const X=v=>w/2+(v-G.cx)*G.s,Y=v=>h/2-(v-G.cy)*G.s;let st=Math.pow(10,Math.floor(Math.log10(60/G.s)));for(const k of [1,2,5,10])if(st*k*G.s>=55){st*=k;break}
+x.font='11px system-ui';x.fillStyle=tx;x.strokeStyle=gr;x.lineWidth=1;x.beginPath();
+const x0=G.cx-w/2/G.s,x1=G.cx+w/2/G.s,y0=G.cy-h/2/G.s,y1=G.cy+h/2/G.s;
+for(let v=Math.ceil(x0/st)*st;v<=x1;v+=st){const p=Math.round(X(v))+.5;x.moveTo(p,0);x.lineTo(p,h);if(Math.abs(v)>st/2)x.fillText(+v.toPrecision(6),p+3,Math.min(h-4,Math.max(12,Y(0)+12)))}
+for(let v=Math.ceil(y0/st)*st;v<=y1;v+=st){const p=Math.round(Y(v))+.5;x.moveTo(0,p);x.lineTo(w,p);if(Math.abs(v)>st/2)x.fillText(+v.toPrecision(6),Math.min(w-34,Math.max(4,X(0)+4)),p-3)}
+x.stroke();x.strokeStyle=fg;x.globalAlpha=.7;x.beginPath();x.moveTo(X(0),0);x.lineTo(X(0),h);x.moveTo(0,Y(0));x.lineTo(w,Y(0));x.stroke();x.globalAlpha=1;x.lineWidth=2;
+G.f.forEach((f,i)=>{if(!f.on||!f.e.trim())return;const n=comp(f.e);if(!n)return;shade(x,n,COL[i%6],w,h,Y);if(n.k==='g')return;x.strokeStyle=COL[i%6];x.setLineDash(n.strict?[6,5]:[]);x.beginPath();let pen=false,pp=0;
+for(let px=0;px<=w;px++){const y=evf(n,G.cx+(px-w/2)/G.s),py=Y(y);if(!isFinite(py)||Math.abs(py)>1e5||(pen&&Math.abs(py-pp)>h*1.5)){pen=false;continue}pen?x.lineTo(px,py):x.moveTo(px,py);pen=true;pp=py}x.stroke();x.setLineDash([])})}
+let drag=null;const gc=$('#gc');
+gc.onpointerdown=e=>{drag=[e.clientX,e.clientY];gc.setPointerCapture(e.pointerId);gc.style.cursor='grabbing'};
+gc.onpointerup=()=>{drag=null;gc.style.cursor='grab'};
+gc.onpointermove=e=>{const r=gc.getBoundingClientRect();if(drag){G.cx-=(e.clientX-drag[0])/G.s;G.cy+=(e.clientY-drag[1])/G.s;drag=[e.clientX,e.clientY];gdraw()}
+const mx=G.cx+(e.clientX-r.left-r.width/2)/G.s,my=G.cy-(e.clientY-r.top-r.height/2)/G.s;
+$('#gi').textContent='x = '+mx.toFixed(3)+',  y = '+my.toFixed(3)+G.f.map((f,i)=>{const n=f.on&&comp(f.e);return n&&n.k!=='g'?`   | f${i+1}(x) = ${fmt(evf(n,mx))}`:''}).join('')};
+gc.onwheel=e=>{e.preventDefault();const r=gc.getBoundingClientRect(),mx=G.cx+(e.clientX-r.left-r.width/2)/G.s,my=G.cy-(e.clientY-r.top-r.height/2)/G.s,k=Math.pow(1.0015,-e.deltaY);G.s=Math.min(1e5,Math.max(.01,G.s*k));G.cx=mx-(e.clientX-r.left-r.width/2)/G.s;G.cy=my+(e.clientY-r.top-r.height/2)/G.s;gdraw()};
+addEventListener('resize',gdraw);
+function scan(f,x0,x1){const r=[],N=3000;let px=x0,py=f(px);for(let i=1;i<=N;i++){const x=x0+(x1-x0)*i/N,y=f(x);if(isFinite(py)&&isFinite(y)&&py*y<0){let lo=px,hi=x;for(let k=0;k<50;k++){const m=(lo+hi)/2;if(f(lo)*f(m)<=0)hi=m;else lo=m}const q=(lo+hi)/2;if(Math.abs(f(q))<1e-6)r.push(q)}else if(y===0)r.push(x);px=x;py=y}return r}
+$('#roots').onclick=()=>{const w=$('#gc').clientWidth,x0=G.cx-w/2/G.s,x1=G.cx+w/2/G.s,ns=G.f.map(f=>f.on&&f.e.trim()?comp(f.e):null),o=[],h=1e-5;
+ns.forEach((n,i)=>{if(!n)return;const f=x=>evf(n,x);scan(f,x0,x1).forEach(r=>o.push(`f${i+1}: root at x = ${fmt(r)}`));const y=f(0);if(isFinite(y))o.push(`f${i+1}: y-intercept (0, ${fmt(y)})`);
+const d=x=>(f(x+h)-f(x-h))/(2*h);scan(d,x0,x1).filter(q=>Math.abs(d(q))<1e-3).forEach(q=>{const dd=d(q+1e-3)-d(q-1e-3);o.push(`f${i+1}: ${dd>0?'minimum':'maximum'} at (${fmt(q)}, ${fmt(f(q))})`)})});
+ns.forEach((n,i)=>ns.forEach((m,j)=>{if(n&&m&&j>i)scan(x=>evf(n,x)-evf(m,x),x0,x1).forEach(q=>o.push(`f${i+1} ∩ f${j+1}: (${fmt(q)}, ${fmt(evf(n,q))})`))}));
+$('#groots').textContent=(o.length?o.join('\n'):'None found in the visible window.')+'\n(Search covers the current view only.)'};
+fnui();
+/* ---------- scientific calculator ---------- */
+let deg=true,mem=0,last=0;const sci=()=>{const s={ans:last};if(deg){const k=Math.PI/180;['sin','cos','tan'].forEach(f=>s[f]=v=>math[f](v*k));['asin','acos','atan'].forEach(f=>s[f]=v=>math[f](v)/k)}return s};
+const KEYS=[],kb=(a,c)=>a.map(k=>{KEYS.push(k);return `<button class="${k[2]||c||''}" data-i="${KEYS.length-1}">${k[0]}</button>`}).join('');
+const PAD=[['C','C','clr'],['⌫','B','clr'],['(','(','op'],[')',')','op'],['7','7','num'],['8','8','num'],['9','9','num'],['÷','/','op'],['4','4','num'],['5','5','num'],['6','6','num'],['×','*','op'],['1','1','num'],['2','2','num'],['3','3','num'],['−','-','op'],['0','0','num'],['.','.','num'],['ans','ans','fnk'],['+','+','op']];
+const FN=[['Trig',[['sin','sin('],['cos','cos('],['tan','tan('],['sin⁻¹','asin('],['cos⁻¹','acos('],['tan⁻¹','atan(']]],['Hyperbolic',[['sinh','sinh('],['cosh','cosh('],['tanh','tanh(']]],['Powers and roots',[['x²','^2'],['xʸ','^'],['√','sqrt('],['x⁻¹','^(-1)'],['|x|','abs('],['x!','!']]],['Logs',[['log','log10('],['ln','log('],['eˣ','exp(']]],['Constants and more',[['π','pi'],['e','e'],['%','%'],['EE','e']]]];
+$('#fnp').innerHTML=FN.map(g=>`<small>${g[0]}</small><div class="g">${kb(g[1],'fnk')}</div>`).join('');$('#keys').innerHTML=kb(PAD)+kb([['=','=','eq']]);
+function calc(){const d=$('#disp');let s=d.value.trim();if(!s)return;try{const r=math.evaluate(s.replace(/(\d+\.?\d*)%/g,'($1/100)'),sci());if(typeof r==='function'||r===undefined)throw Error('Incomplete expression');last=r;$('#ans').textContent=typeof r==='number'?nice(r):fmt(r);const h=S.get('sh',[]);h.unshift(s+' = '+fmt(r));S.set('sh',h.slice(0,30));log('Calculator',s,fmt(r));shr()}catch(e){$('#ans').innerHTML='<span class="err" style="font-size:16px">'+e.message.replace(/</g,'&lt;')+'</span>'}}
+const shr=()=>{$('#sh').textContent=S.get('sh',[]).join('\n')||'No calculations yet.'};
+$('.calc').onclick=e=>{const i=(e.target.closest('[data-i]')||{dataset:{}}).dataset.i;if(i==null)return;const k=KEYS[i][1],d=$('#disp');if(k==='=')calc();else if(k==='C'){d.value='';$('#ans').textContent=''}else if(k==='B')d.value=d.value.slice(0,-1);else d.value+=k;d.focus()};
+$('#disp').onkeydown=e=>{if(e.key==='Enter')calc()};
+$('#dm').onclick=e=>{deg=!deg;e.target.textContent='Mode: '+(deg?'DEG':'RAD')};
+$('#mc').onclick=()=>mem=0;$('#mr').onclick=()=>{$('#disp').value+=mem};$('#mp').onclick=()=>{if(typeof last==='number')mem+=last};$('#mm').onclick=()=>{if(typeof last==='number')mem-=last};
+$('#cp').onclick=()=>copy($('#ans').textContent,$('#cp'));
+/* ---------- solver & calculus ---------- */
+function solveEq(str){const [l,r]=str.split('=');if(r===undefined||str.split('=').length>2)throw Error('Enter an equation with exactly one “=”.');const n=math.compile(`(${l})-(${r})`),F=x=>{const y=n.evaluate({x});if(typeof y!=='number')throw Error('Only real-valued equations in x are supported.');return y},c=F(0),s1=F(1),t=F(-1),a=(s1+t)/2-c,b=(s1-t)/2,tol=v=>1e-9*(1+Math.abs(v));
+const poly=[2,3,-2.5,7].every(x=>Math.abs(F(x)-(a*x*x+b*x+c))<tol(F(x)));let o=[];
+if(poly&&Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return Math.abs(c)<1e-12?'Identity: every x is a solution.':'No solution (contradiction: '+fmt(c)+' = 0).';
+const x=-c/b;o.push('Move everything to one side: '+nice(b)+'·x + '+nice(c)+' = 0','Subtract the constant: '+nice(b)+'·x = '+nice(-c),'Divide by '+nice(b)+': x = '+nice(x),'Check: left − right = '+fmt(F(x)),'','x = '+nice(x));return o.join('\n')}
+if(poly){const D=b*b-4*a*c;o.push('Standard form: '+nice(a)+'x² + '+nice(b)+'x + '+nice(c)+' = 0','Quadratic formula x = (−b ± √(b²−4ac)) / 2a','Discriminant D = '+nice(D));
+if(Math.abs(D)<1e-12){o.push('D = 0: one repeated root','','x = '+nice(-b/(2*a))+' (multiplicity 2)')}else if(D>0){const q=Math.sqrt(D),x1=(-b+q)/(2*a),x2=(-b-q)/(2*a);o.push('D > 0: two real roots','Check: '+fmt(F(x1))+', '+fmt(F(x2)),'','x = '+nice(x1)+'   or   x = '+nice(x2))}else{const re=-b/(2*a),im=Math.sqrt(-D)/(2*a);o.push('D < 0: no real roots, two complex roots','','x = '+fmt(re)+' ± '+fmt(Math.abs(im))+'i')}return o.join('\n')}
+const rs=scan(F,-100,100);const uniq=rs.filter((v,i)=>!i||Math.abs(v-rs[i-1])>1e-6);return uniq.length?'Not a polynomial of degree ≤ 2, so roots were found numerically on [−100, 100]:\n'+uniq.map(v=>'x ≈ '+fmt(v)+'   (residual '+Math.abs(F(v)).toExponential(1)+')').join('\n'):'No real roots found on [−100, 100].'}
+$('#sgo').onclick=()=>{const op=$('#sop').value,e=$('#sin').value.trim(),v=$('#sv').value.trim()||'x';try{if(!e)throw Error('Enter an expression.');let o;
+if(op==='solve')o=solveEq(e.replace(/\s+/g,' '));
+else if(op==='eval'){const r=math.evaluate(e);o=typeof r==='number'?nice(r):fmt(r)}
+else if(op==='simp')o=math.simplify(e).toString();
+else if(op==='der'){const k=Math.max(1,Math.round(num('#s1')));let d=math.parse(e);for(let i=0;i<k;i++)d=math.simplify(math.derivative(d,v));const f=math.compile(e),h=1e-5;o=`d${k>1?'^'+k:''}/d${v}${k>1?'^'+k:''} [${e}] = ${d.toString()}`;if(k===1){const x0=1.3,nd=(f.evaluate({[v]:x0+h})-f.evaluate({[v]:x0-h}))/(2*h);o+=`\n\nVerification at ${v} = ${x0}: formula gives ${fmt(d.evaluate({[v]:x0}))}, numeric slope ${fmt(nd)}`}}
+else if(op==='int'){const a=num('#s1'),b=num('#s2'),f=math.compile(e),N=2000,hh=(b-a)/N;let sm=0;const g=x=>{const y=f.evaluate({[v]:x});if(typeof y!=='number'||!isFinite(y))throw Error('Function is not finite on the interval.');return y};for(let i=0;i<=N;i++)sm+=g(a+i*hh)*(i===0||i===N?1:i%2?4:2);o=`∫ from ${a} to ${b} of ${e} d${v} ≈ ${fmt(sm*hh/3)}\n(Simpson’s rule, 2000 subintervals; indefinite integrals are not supported.)`}
+else{const p=num('#s1'),f=math.compile(e),g=x=>f.evaluate({[v]:x}),L=[1e-4,1e-6,1e-8].map(h=>g(p-h)),R=[1e-4,1e-6,1e-8].map(h=>g(p+h)),l=L[2],r=R[2];o=`Left: ${fmt(l)}   Right: ${fmt(r)}\n`+(Math.abs(l-r)<1e-3*(1+Math.abs(l))?'Limit ≈ '+fmt(+((l+r)/2).toPrecision(6)):'The one-sided limits differ, so the limit does not exist.')}
+$('#sout').textContent=o;log('Solver',op+': '+e,o.split('\n').pop())}catch(x){bad('#sout',x)}};
+/* ---------- matrix ---------- */
+function rref(M){M=M.map(r=>r.slice());let r=0;const R=M.length,C=M[0].length;for(let c=0;c<C&&r<R;c++){let p=r;for(let i=r;i<R;i++)if(Math.abs(M[i][c])>Math.abs(M[p][c]))p=i;if(Math.abs(M[p][c])<1e-12)continue;[M[r],M[p]]=[M[p],M[r]];const d=M[r][c];M[r]=M[r].map(v=>v/d);for(let i=0;i<R;i++)if(i!==r){const f=M[i][c];M[i]=M[i].map((v,j)=>v-f*M[r][j])}r++}return M}
+const mt=m=>Array.isArray(m)||(m&&m.toArray)?'<table>'+(([].concat(math.matrix(m).toArray()).every(r=>!Array.isArray(r))?[math.matrix(m).toArray()]:math.matrix(m).toArray()).map(r=>'<tr>'+r.map(v=>'<td>'+fmt(v)+'</td>').join('')+'</tr>').join(''))+'</table>':fmt(m);
+const MOPS={'A+B':(a,b)=>math.add(a,b),'A−B':(a,b)=>math.subtract(a,b),'A×B':(a,b)=>math.multiply(a,b),'det A':a=>math.det(a),'inverse A':a=>math.inv(a),'transpose A':a=>math.transpose(a),'rref A':a=>rref(a),'solve A·x=B':(a,b)=>math.lusolve(a,b),'trace A':a=>math.trace(a),'A · B (dot)':(a,b)=>math.dot(a,b),'A × B (cross)':(a,b)=>math.cross(a,b),'|A|':a=>math.norm(a),'eigen A':a=>{const e=math.eigs(a);return 'Eigenvalues: '+e.values.toArray().map(fmt).join(', ')+'\nEigenvectors:\n'+e.eigenvectors.map(x=>fmt(x.value)+' → '+fmt(x.vector)).join('\n')}};
+$('#mops').innerHTML=Object.keys(MOPS).map(k=>`<button>${k}</button>`).join('');
+$('#mops').onclick=e=>{const k=e.target.textContent;if(!MOPS[k])return;try{const A=math.evaluate($('#ma').value),B=math.evaluate($('#mb').value),r=MOPS[k](A.toArray?A.toArray():A,B.toArray?B.toArray():B);$('#mout').innerHTML=typeof r==='string'?r.replace(/</g,'&lt;'):mt(r);log('Matrix',k+' on '+$('#ma').value+' / '+$('#mb').value,typeof r==='string'?r.split('\n')[0]:fmt(r))}catch(x){bad('#mout',x)}};
+/* ---------- statistics ---------- */
+const nums=s=>s.split(/[\s,;]+/).filter(Boolean).map(Number);
+$('#sgo2').onclick=()=>{try{const d=nums($('#sx').value);if(d.length<2||d.some(isNaN))throw Error('Enter at least two numeric values.');const n=d.length,q=p=>math.quantileSeq(d,p),sd=math.std(d),m=math.mean(d),se=sd/Math.sqrt(n);
+let o=`n = ${n}\nsum = ${fmt(math.sum(d))}\nmean = ${fmt(m)}\nmedian = ${fmt(math.median(d))}\nmode = ${math.mode(d).join(', ')}\nmin / max = ${fmt(Math.min(...d))} / ${fmt(Math.max(...d))}\nrange = ${fmt(Math.max(...d)-Math.min(...d))}\nQ1 / Q3 = ${fmt(q(.25))} / ${fmt(q(.75))}   IQR = ${fmt(q(.75)-q(.25))}\nsample variance = ${fmt(math.variance(d))}\nsample SD = ${fmt(sd)}\npopulation SD = ${fmt(math.std(d,'uncorrected'))}\n95% CI for mean ≈ ${fmt(m-1.96*se)} to ${fmt(m+1.96*se)} (normal approximation)`;
+const ys=nums($('#sy').value);if(ys.length){if(ys.length!==n||ys.some(isNaN))throw Error('x and y need the same number of values.');const my=math.mean(ys),sxy=d.reduce((s,v,i)=>s+(v-m)*(ys[i]-my),0),sxx=d.reduce((s,v)=>s+(v-m)**2,0),syy=ys.reduce((s,v)=>s+(v-my)**2,0),b=sxy/sxx,r=sxy/Math.sqrt(sxx*syy);o+=`\n\nRegression: y = ${fmt(b)}x + ${fmt(my-b*m)}\ncorrelation r = ${fmt(r)}   r² = ${fmt(r*r)}`}
+$('#stout').textContent=o;const k=Math.max(3,Math.ceil(Math.sqrt(n))),lo=Math.min(...d),w=(Math.max(...d)-lo)/k||1,bn=Array(k).fill(0);d.forEach(v=>bn[Math.min(k-1,Math.floor((v-lo)/w))]++);const mx=Math.max(...bn);$('#hist').innerHTML=bn.map((c,i)=>`<div title="${fmt(lo+i*w)}–${fmt(lo+(i+1)*w)}: ${c}" style="height:${c/mx*100}%"></div>`).join('');log('Statistics','data n='+n,'mean '+fmt(m)+', SD '+fmt(sd))}catch(x){bad('#stout',x)}};
+$('#pgo').onclick=()=>{try{const n=num('#pn'),k=num('#pk'),p=num('#pp'),mu=num('#pm'),sg=num('#ps'),x=num('#px');if(sg<=0)throw Error('σ must be positive.');let o=`nCr = ${fmt(math.combinations(n,k))}\nnPr = ${fmt(math.permutations(n,k))}\n`;if(p>=0&&p<=1){let c=0;for(let i=0;i<=k;i++)c+=+math.combinations(n,i)*p**i*(1-p)**(n-i);o+=`Binomial(n,p): P(X=k) = ${fmt(+math.combinations(n,k)*p**k*(1-p)**(n-k))}   P(X≤k) = ${fmt(c)}\n`}const z=(x-mu)/sg;o+=`z-score of x = ${fmt(z)}\nNormal: P(X≤x) = ${fmt(.5*(1+math.erf(z/Math.SQRT2)))}   density = ${fmt(Math.exp(-z*z/2)/(sg*Math.sqrt(2*Math.PI)))}`;$('#pout').textContent=o;log('Probability',`n=${n}, k=${k}, p=${p}, x=${x}`,'see results')}catch(x){bad('#pout',x)}};
+/* ---------- geometry ---------- */
+const GEO=[['Circle','r',{Area:'pi*r^2',Circumference:'2*pi*r',Diameter:'2*r'}],['Rectangle','w,h',{Area:'w*h',Perimeter:'2*(w+h)',Diagonal:'sqrt(w^2+h^2)'}],['Triangle (3 sides)','a,b,c',{Perimeter:'a+b+c',"Area (Heron)":'sqrt(((a+b+c)/2)*((a+b+c)/2-a)*((a+b+c)/2-b)*((a+b+c)/2-c))'}],['Right triangle (legs)','a,b',{Hypotenuse:'sqrt(a^2+b^2)',Area:'a*b/2',Perimeter:'a+b+sqrt(a^2+b^2)'}],['Cube','s',{Volume:'s^3','Surface area':'6*s^2'}],['Sphere','r',{Volume:'4/3*pi*r^3','Surface area':'4*pi*r^2'}],['Cylinder','r,h',{Volume:'pi*r^2*h','Surface area':'2*pi*r*(r+h)'}],['Cone','r,h',{Volume:'pi*r^2*h/3','Surface area':'pi*r*(r+sqrt(r^2+h^2))'}],['Two points','x1,y1,x2,y2',{Distance:'sqrt((x2-x1)^2+(y2-y1)^2)','Midpoint x':'(x1+x2)/2','Midpoint y':'(y1+y2)/2',Slope:'(y2-y1)/(x2-x1)'}]];
+$('#gsh').innerHTML=GEO.map((g,i)=>`<option value="${i}">${g[0]}</option>`).join('');
+const ginit=()=>{$('#gin').innerHTML=GEO[$('#gsh').value][1].split(',').map(p=>`<label>${p}<input data-p="${p}" value="${p==='x1'||p==='y1'?0:3}"></label>`).join('')};$('#gsh').onchange=ginit;ginit();
+$('#ggo').onclick=()=>{const g=GEO[$('#gsh').value],sc={};let o=[];try{$$('#gin input').forEach(i=>{const v=parseFloat(i.value);if(isNaN(v))throw Error('Enter a number for '+i.dataset.p);sc[i.dataset.p]=v});
+for(const [k,f] of Object.entries(g[2])){const sub=f.replace(/\b[a-z]\w*\b/g,m=>m in sc?'('+sc[m]+')':m);let r=math.evaluate(f,sc);o.push(`${k} = ${f.replace(/\*/g,'·')}\n   = ${sub.replace(/\*/g,'·')}\n   = ${typeof r==='number'&&isFinite(r)?fmt(r)+(/Area|Surf/.test(k)?' (square units)':/Volume/.test(k)?' (cubic units)':' (units)'):'undefined for these inputs'}`)}
+$('#gout').textContent=o.join('\n\n');log('Geometry',g[0]+' '+JSON.stringify(sc),o[0].split('\n').pop().trim())}catch(x){bad('#gout',x)}};
+/* ---------- number theory ---------- */
+const bp=(b,e,m)=>{let r=1n;b%=m;while(e>0n){if(e&1n)r=r*b%m;b=b*b%m;e>>=1n}return r};
+$('#ngo').onclick=()=>{try{const n=num('#nn'),a=num('#na'),b=num('#nb'),m=num('#nm');if([n,a,b,m].some(v=>!Number.isInteger(v)||Math.abs(v)>9e15))throw Error('Use whole numbers up to 9×10¹⁵.');if(n<2||n>9e15)throw Error('n must be between 2 and 9×10¹⁵.');
+let f=[],t=n,i=2;while(i*i<=t&&i<1e8){while(t%i===0){f.push(i);t/=i}i+=i===2?1:2}if(t>1)f.push(t);const cnt={};f.forEach(p=>cnt[p]=(cnt[p]||0)+1);const g=math.gcd(a,b);
+const o=`n = ${n}: ${f.length===1?'prime':'composite'}\nPrime factorization: ${Object.entries(cnt).map(([p,e])=>e>1?p+'^'+e:p).join(' × ')}\ngcd(${a}, ${b}) = ${g}\nlcm(${a}, ${b}) = ${math.lcm(a,b)}\n${a} mod ${m} = ${((a%m)+m)%m}\n${a}^${b} mod ${m} = ${b>=0&&m>0?bp(BigInt(a),BigInt(b),BigInt(m)):'needs b ≥ 0 and m > 0'}\nFibonacci(${Math.min(n,300)}) = ${(()=>{let x=0n,y=1n;for(let k=0;k<Math.min(n,300);k++)[x,y]=[y,x+y];return x})()}`;$('#nout').textContent=o;log('Number theory','n='+n,f.length===1?'prime':'composite')}catch(x){bad('#nout',x)}};
+/* ---------- units ---------- */
+const U={Length:{m:1,km:1e3,cm:.01,mm:.001,mile:1609.344,yard:.9144,foot:.3048,inch:.0254},Area:{'m²':1,'km²':1e6,hectare:1e4,acre:4046.8564224,'ft²':.09290304},Volume:{L:1,mL:.001,'m³':1e3,gallon:3.785411784,cup:.2365882365},Mass:{kg:1,g:.001,lb:.45359237,oz:.028349523125},Time:{s:1,min:60,hour:3600,day:86400,week:604800},Speed:{'m/s':1,'km/h':1/3.6,mph:.44704,knot:.514444},Energy:{J:1,kJ:1e3,calorie:4.184,kWh:3.6e6},Pressure:{Pa:1,kPa:1e3,bar:1e5,atm:101325,psi:6894.757},Angle:{degree:1,radian:180/Math.PI,gradian:.9},Temperature:{'°C':1,'°F':1,K:1}};
+$('#uc').innerHTML=Object.keys(U).map(k=>`<option>${k}</option>`).join('');
+const uset=()=>{const o=Object.keys(U[$('#uc').value]).map(k=>`<option>${k}</option>`).join('');$('#uf').innerHTML=o;$('#ut').innerHTML=o;$('#ut').selectedIndex=1;uc()};
+function uc(){try{const v=num('#uv'),c=$('#uc').value,f=$('#uf').value,t=$('#ut').value;let r;if(c==='Temperature'){const k=f==='°C'?v+273.15:f==='°F'?(v-32)*5/9+273.15:v;r=t==='°C'?k-273.15:t==='°F'?(k-273.15)*9/5+32:k}else r=v*U[c][f]/U[c][t];$('#uout').textContent=`${fmt(v)} ${f} = ${fmt(r)} ${t}`}catch(x){bad('#uout',x)}}
+$('#uc').onchange=uset;['#uv','#uf','#ut'].forEach(s=>$(s).oninput=uc);uset();
+/* ---------- finance ---------- */
+$('#fgo').onclick=()=>{try{const P=num('#fp'),r=num('#fr')/100,n=num('#fn'),y=num('#fy'),L=num('#lp'),lr=num('#lr')/1200,ly=num('#ly')*12,co=num('#co'),cn=num('#cn');if(n<=0||co===0)throw Error('Times per year must be positive and old value cannot be 0.');
+const A=P*Math.pow(1+r/n,n*y),pay=lr===0?L/ly:L*lr/(1-Math.pow(1+lr,-ly)),m=x=>x.toLocaleString(undefined,{maximumFractionDigits:2});
+const o=`Compound interest: final amount = ${m(A)}  (interest earned ${m(A-P)})\nLoan: monthly payment = ${m(pay)}  total paid = ${m(pay*ly)}  total interest = ${m(pay*ly-L)}\nFirst payment splits into interest ${m(L*lr)} and principal ${m(pay-L*lr)}\nPercentage change: ${fmt((cn-co)/Math.abs(co)*100)}%`;$('#fout').textContent=o;log('Finance',`P=${P}, loan=${L}`,'payment '+m(pay))}catch(x){bad('#fout',x)}};
+/* ---------- practice ---------- */
+let Q=null,sc2=S.get('prac',{ok:0,n:0,miss:[]});const R=n=>Math.floor(Math.random()*n)+1;
+const psc=()=>{$('#psc').textContent=`Score: ${sc2.ok} / ${sc2.n}`+(sc2.miss.length?'   Missed recently: '+sc2.miss.slice(0,5).join('; '):'')};
+$('#pnew').onclick=()=>{const t=$('#pt').value,d=+$('#pd').value;if(t==='arith'){const a=R(10*d),b=R(10*d),c=R(10*d);Q={q:`${a} × ${b} + ${c} = ?`,a:a*b+c,h:'Multiply first, then add.',e:`${a}×${b} = ${a*b}, and ${a*b} + ${c} = ${a*b+c}.`}}
+else if(t==='lin'){const x=R(5*d)-3*d,a=R(2+d),b=R(10*d);Q={q:`Solve for x: ${a}x + ${b} = ${a*x+b}`,a:x,h:'Subtract the constant first, then divide.',e:`${a}x = ${a*x}, so x = ${x}.`}}
+else{const n=R(1+d)+1,a=R(3+d),k=R(3);Q={q:`If f(x) = ${a}x^${n}, find f′(${k}).`,a:a*n*Math.pow(k,n-1),h:'Power rule: bring the exponent down and subtract 1 from it.',e:`f′(x) = ${a*n}x^${n-1}, so f′(${k}) = ${a*n*Math.pow(k,n-1)}.`}}
+$('#pq').textContent=Q.q;$('#pa').value='';$('#pres').textContent='';psc()};
+$('#phint').onclick=()=>{if(Q)$('#pres').textContent='Hint: '+Q.h};
+$('#pchk').onclick=()=>{if(!Q)return;try{const v=math.evaluate($('#pa').value);if(typeof v!=='number')throw Error('Enter a number.');sc2.n++;if(Math.abs(v-Q.a)<1e-6){sc2.ok++;$('#pres').innerHTML='<span class="ok">Correct.</span> '+Q.e}else{sc2.miss.unshift(Q.q);sc2.miss=sc2.miss.slice(0,10);$('#pres').innerHTML='<span class="err">Not quite.</span> '+Q.e}S.set('prac',sc2);psc()}catch(x){bad('#pres',x)}};
+$('#pa').onkeydown=e=>{if(e.key==='Enter')$('#pchk').click()};psc();
+
+
+
+/* ---------- trigonometry ---------- */
+const SP={0:['0','1'],30:['1/2','√3/2'],45:['√2/2','√2/2'],60:['√3/2','1/2'],90:['1','0']};
+function trig(){try{const a=num('#ta'),dg=$('#tu').value==='d'?a:a*180/Math.PI,rd=dg*Math.PI/180,k=((dg%360)+360)%360,ref=k<=90?k:k<=180?180-k:k<=270?k-180:360-k,sp=SP[Math.round(ref*1e6)/1e6],z=v=>Math.abs(v)<1e-12?0:v,s=z(Math.sin(rd)),c=z(Math.cos(rd)),u=v=>fmt(+v.toPrecision(10)),ex=(i,sg)=>sp?(sp[i]==='0'?'0':(sg<0?'-':'')+sp[i]):'',v=num('#ti');
+const L=[`${u(dg)}° = ${u(rd)} rad`,'',`sin = ${u(s)}${sp?'   exact: '+ex(0,k<=180?1:-1):''}`,`cos = ${u(c)}${sp?'   exact: '+ex(1,k<=90||k>=270?1:-1):''}`,`tan = ${c?u(s/c):'undefined'}`,`csc = ${s?u(1/s):'undefined'}`,`sec = ${c?u(1/c):'undefined'}`,`cot = ${s?u(c/s):'undefined'}`,'',`Inverse functions of ${v}:`];
+L.push(Math.abs(v)<=1?`sin⁻¹ = ${u(Math.asin(v)*180/Math.PI)}°   cos⁻¹ = ${u(Math.acos(v)*180/Math.PI)}°`:'sin⁻¹ and cos⁻¹ need a value from −1 to 1',`tan⁻¹ = ${u(Math.atan(v)*180/Math.PI)}°`);$('#tout').textContent=L.join('\n');
+const x=$('#uc2').getContext('2d'),cs=getComputedStyle(document.documentElement),px=130+100*c,py=130-100*s;x.clearRect(0,0,260,260);x.lineWidth=1;x.strokeStyle=cs.getPropertyValue('--m');x.beginPath();x.arc(130,130,100,0,7);x.moveTo(10,130);x.lineTo(250,130);x.moveTo(130,10);x.lineTo(130,250);x.stroke();x.lineWidth=2.5;x.strokeStyle=cs.getPropertyValue('--a');x.beginPath();x.moveTo(130,130);x.lineTo(px,py);x.stroke();x.strokeStyle=cs.getPropertyValue('--b');x.beginPath();x.moveTo(px,130);x.lineTo(px,py);x.stroke();x.fillStyle=cs.getPropertyValue('--t');x.beginPath();x.arc(px,py,4,0,7);x.fill()}catch(e){bad('#tout',e)}}
+['#ta','#tu','#ti'].forEach(s=>$(s).oninput=trig);trig();
+function tri(v,mode){const r=Math.PI/180,s=v.slice();let ch=1,it=0;while(ch&&it++<8){ch=0;const set=(i,x)=>{if(s[i]==null&&isFinite(x)){s[i]=x;ch=1}};
+for(let i=0;i<3;i++){const k=[0,1,2].filter(j=>j!==i);if(s[3+k[0]]!=null&&s[3+k[1]]!=null)set(3+i,180-s[3+k[0]]-s[3+k[1]])}
+for(let i=0;i<3;i++){const j=(i+1)%3,k=(i+2)%3;if(s[j]!=null&&s[k]!=null&&s[3+i]!=null)set(i,Math.sqrt(s[j]**2+s[k]**2-2*s[j]*s[k]*Math.cos(s[3+i]*r)))}
+if(s[0]!=null&&s[1]!=null&&s[2]!=null)for(let i=0;i<3;i++){const j=(i+1)%3,k=(i+2)%3,q=(s[j]**2+s[k]**2-s[i]**2)/(2*s[j]*s[k]);if(Math.abs(q)<=1)set(3+i,Math.acos(q)/r)}
+for(let i=0;i<3;i++)if(s[i]!=null&&s[3+i]!=null){const K=s[i]/Math.sin(s[3+i]*r);for(let j=0;j<3;j++){if(j===i)continue;if(s[j]==null&&s[3+j]!=null)set(j,K*Math.sin(s[3+j]*r));if(s[3+j]==null&&s[j]!=null){const q=s[j]/K;if(Math.abs(q)<=1+1e-12){let g=Math.asin(Math.min(1,q))/r;if(mode)g=180-g;set(3+j,g)}}}}}return s}
+$('#trg').onclick=()=>{try{const v=$$('#tri input').map(i=>i.value.trim()===''?null:+i.value);if(v.some(x=>x!==null&&!(x>0)))throw Error('Enter positive numbers (angles in degrees).');if(v.slice(0,3).every(x=>x===null))throw Error('Enter at least one side.');if(v.filter(x=>x!==null).length<3)throw Error('Enter at least three values.');if(v.slice(3).some(x=>x>=180))throw Error('Angles must be below 180°.');const r=Math.PI/180,sols=[];
+[0,1].forEach(m=>{const s=tri(v,m);if(s.every(x=>x!=null&&x>0)&&Math.abs(s[3]+s[4]+s[5]-180)<1e-6&&[1,2].every(i=>Math.abs(s[i]/Math.sin(s[3+i]*r)/(s[0]/Math.sin(s[3]*r))-1)<1e-6)&&!sols.some(t=>t.every((y,i)=>Math.abs(y-s[i])<1e-6)))sols.push(s)});
+if(!sols.length)throw Error('No triangle fits those values.');const f=x=>fmt(+x.toFixed(6));$('#triout').textContent=sols.map((s,k)=>(sols.length>1?`Solution ${k+1}\n`:'')+`sides a, b, c = ${s.slice(0,3).map(f).join(', ')}\nangles A, B, C = ${s.slice(3).map(f).join('°, ')}°\narea = ${f(.5*s[1]*s[2]*Math.sin(s[3]*r))}`).join('\n\n')+(sols.length>1?'\n\nTwo triangles fit these values (the ambiguous SSA case).':'')}catch(x){bad('#triout',x)}};
+/* ---------- sequences ---------- */
+$('#qgo').onclick=()=>{try{const t=$('#qt').value,a=num('#q1'),d=num('#q2'),n=num('#qn');if(!Number.isInteger(n)||n<1||n>1000)throw Error('n must be a whole number from 1 to 1000.');const o=[],m=Math.min(n,10);
+if(t==='f'){let x=0n,y=1n,sm=0n;const l=[];for(let i=1;i<=n;i++){[x,y]=[y,x+y];sm+=x;if(i<=12)l.push(x)}o.push(`F(${n}) = ${x}`,`Sum of the first ${n} terms = ${sm}  (= F(${n+2}) − 1)`,`First terms: ${l.join(', ')}`)}
+else if(t==='a')o.push('aₙ = a₁ + (n − 1)d',`a${n} = ${nice(a+(n-1)*d)}`,'Sₙ = n/2 · (2a₁ + (n − 1)d)',`S${n} = ${nice(n/2*(2*a+(n-1)*d))}`,'First terms: '+Array.from({length:m},(_,i)=>fmt(a+i*d)).join(', '));
+else o.push('aₙ = a₁ · r^(n − 1)',`a${n} = ${fmt(a*Math.pow(d,n-1))}`,d===1?`S${n} = n · a₁ = ${fmt(n*a)}`:`Sₙ = a₁(1 − rⁿ)/(1 − r), S${n} = ${fmt(a*(1-Math.pow(d,n))/(1-d))}`,Math.abs(d)<1?`Infinite sum a₁/(1 − r) = ${nice(a/(1-d))}`:'The infinite sum diverges because |r| ≥ 1','First terms: '+Array.from({length:m},(_,i)=>fmt(a*Math.pow(d,i))).join(', '));
+$('#qout').textContent=o.join('\n')}catch(x){bad('#qout',x)}};
+$('#skgo').onclick=()=>{try{const f=math.compile($('#ske').value),a=num('#skf'),b=num('#skt');if(!Number.isInteger(a)||!Number.isInteger(b)||b-a>1e6)throw Error('Use whole-number bounds, at most 1,000,000 terms.');let s=0;for(let k=a;k<=b;k++){const y=f.evaluate({k});if(typeof y!=='number')throw Error('The expression must be real-valued in k.');s+=y}$('#skout').textContent=`Σ (k = ${a} to ${b}) of ${$('#ske').value} = ${nice(s)}`}catch(x){bad('#skout',x)}};
+/* ---------- polynomials ---------- */
+function coef(e){const f=math.compile(pre(e)),g=x=>{const y=f.evaluate({x});if(typeof y!=='number')throw Error('Use a real polynomial in x.');return y};for(let d=0;d<=10;d++){const p=[...Array(d+1).keys()],c=math.lusolve(p.map(x=>p.map((_,k)=>x**k)),p.map(g)).flat().map(v=>Math.round(v*1e9)/1e9);if([-1.5,2.5,7.25].every(x=>Math.abs(c.reduce((s,v,k)=>s+v*x**k,0)-g(x))<=1e-7*(1+Math.abs(g(x)))))return c}throw Error('That is not a polynomial of degree 10 or less.')}
+const pstr=c=>{const o=[];for(let i=c.length-1;i>=0;i--){const v=c[i];if(Math.abs(v)<1e-12)continue;const a=Math.abs(v),m=i===0?fmt(a):(a===1?'':fmt(a))+'x'+(i>1?'^'+i:'');o.push((o.length?(v<0?' − ':' + '):(v<0?'−':''))+m)}return o.join('')||'0'};
+function proots(c){const n=c.length-1,p=c.map(v=>v/c[n]),f=x=>p.reduceRight((s,co)=>math.add(math.multiply(s,x),co),0);let z=Array.from({length:n},(_,k)=>math.pow(math.complex(.4,.9),k));for(let it=0;it<800;it++){let md=0;z=z.map((zi,i)=>{let d=1;z.forEach((zj,j)=>{if(j!==i)d=math.multiply(d,math.subtract(zi,zj))});const dz=math.divide(f(zi),d);md=Math.max(md,math.abs(dz));return math.subtract(zi,dz)});if(md<1e-13)break}return z.map(v=>{const q=math.complex(v);return{re:Math.abs(q.re)<1e-9?0:q.re,im:Math.abs(q.im)<1e-7?0:q.im}})}
+$('#polgo').onclick=()=>{try{const c=coef($('#p1').value),d=c.length-1,o=[`p(x) = ${pstr(c)}`,`degree = ${d}`,`p′(x) = ${pstr(c.slice(1).map((v,i)=>v*(i+1)))}`];
+if(d>=1){const g=[];proots(c).forEach(z=>{const h=g.find(q=>Math.hypot(q.re-z.re,q.im-z.im)<1e-4);h?h.m++:g.push({re:z.re,im:z.im,m:1})});const R=x=>Math.round(x*1e6)/1e6,fac=[];o.push('','Roots (numeric, then rounded):');
+g.filter(q=>q.im>=0).forEach(q=>{const mu=q.m>1?`  (multiplicity ${q.m})`:'';if(q.im===0){o.push(`x = ${nice(R(q.re))}${mu}`);fac.push(`(${pstr([-R(q.re),1])})${q.m>1?'^'+q.m:''}`)}else{o.push(`x = ${fmt(R(q.re))} ± ${fmt(R(q.im))}i${mu}`);fac.push(`(${pstr([R(q.re*q.re+q.im*q.im),-2*R(q.re),1])})${q.m>1?'^'+q.m:''}`)}});
+o.push('',`Factored over the reals: ${c[d]===1?'':fmt(c[d])+' '}${fac.join('')}`)}
+$('#pol').textContent=o.join('\n')}catch(x){bad('#pol',x)}};
+$('#pdv').onclick=()=>{try{const n=coef($('#p1').value),d=coef($('#p2').value);if(d.length===1&&Math.abs(d[0])<1e-12)throw Error('The divisor cannot be zero.');const q=Array(Math.max(n.length-d.length+1,1)).fill(0),r=n.slice();for(let i=n.length-d.length;i>=0;i--){const t=r[i+d.length-1]/d[d.length-1];q[i]=t;for(let j=0;j<d.length;j++)r[i+j]-=t*d[j]}const rm=r.slice(0,Math.max(d.length-1,1)).map(v=>Math.round(v*1e9)/1e9);$('#pol').textContent=`(${pstr(n)}) ÷ (${pstr(d)})\nquotient = ${pstr(q.map(v=>Math.round(v*1e9)/1e9))}\nremainder = ${pstr(rm)}`}catch(x){bad('#pol',x)}};
+/* ---------- systems ---------- */
+$('#sysgo').onclick=()=>{try{const L=$('#sy1').value.split('\n').map(s=>s.trim()).filter(Boolean);if(!L.length)throw Error('Enter at least one equation.');const nodes=[],vs=new Set();L.forEach(s=>{const p=s.split('=');if(p.length!==2)throw Error('Each line needs exactly one “=”: '+s);const e=pre(`(${p[0]})-(${p[1]})`);math.parse(e).traverse(n=>{if(n.isSymbolNode&&!(n.name in math))vs.add(n.name)});nodes.push(math.compile(e))});const V=[...vs].sort(),m=V.length;if(!m||m>8)throw Error('Use between 1 and 8 variables.');
+const z=Object.fromEntries(V.map(v=>[v,0])),M=nodes.map(n=>{const c0=n.evaluate(z),row=V.map(v=>n.evaluate({...z,[v]:1})-c0),t=Object.fromEntries(V.map((v,i)=>[v,i+2.5])),pr=c0+row.reduce((s,a,i)=>s+a*(i+2.5),0);if(Math.abs(n.evaluate(t)-pr)>1e-8*(1+Math.abs(pr)))throw Error('Only linear equations are supported here.');return[...row,-c0]});
+const Rr=rref(M),q=v=>fmt(+v.toFixed(8)),o=[`Variables: ${V.join(', ')}`,'Augmented matrix [A | b]:',...M.map(r=>'  '+r.map(q).join('   ')),'','Reduced row echelon form:',...Rr.map(r=>'  '+r.map(q).join('   ')),''],piv=Rr.map(r=>r.findIndex((v,i)=>i<m&&Math.abs(v)>1e-9));
+if(Rr.some((r,i)=>piv[i]<0&&Math.abs(r[m])>1e-9))o.push('No solution: the equations contradict each other.');else if(piv.filter(p=>p>=0).length<m)o.push('Infinitely many solutions: there are fewer independent equations than variables.');else o.push(...V.map((v,j)=>`${v} = ${nice(+Rr[piv.indexOf(j)][m].toFixed(9))}`));$('#syout').textContent=o.join('\n')}catch(x){bad('#syout',x)}};
+/* ---------- logic and sets ---------- */
+$('#lgo').onclick=()=>{try{const e=$('#lg').value.trim(),nm=new Set();math.parse(e).traverse(n=>{if(n.isSymbolNode&&!(n.name in math))nm.add(n.name)});const V=[...nm].sort();if(!V.length||V.length>6)throw Error('Use between 1 and 6 variables (letters like A, B, C).');const f=math.compile(e),rows=[];for(let i=0;i<1<<V.length;i++){const sc={};V.forEach((v,j)=>sc[v]=!((i>>(V.length-1-j))&1));const r=f.evaluate(sc);if(typeof r!=='boolean'&&typeof r!=='number')throw Error('Use and, or, not, xor with letter variables.');rows.push([...V.map(v=>sc[v]),!!r])}
+const T=b=>b?'T':'F',all=rows.every(r=>r[V.length]),none=rows.every(r=>!r[V.length]);$('#lgout').innerHTML='<table><tr>'+V.map(v=>`<th>${v}</th>`).join('')+'<th>Result</th></tr>'+rows.map(r=>'<tr>'+r.map(b=>`<td>${T(b)}</td>`).join('')+'</tr>').join('')+`</table>\n${all?'Tautology: always true.':none?'Contradiction: always false.':'Contingent: true for some inputs and false for others.'}`}catch(x){bad('#lgout',x)}};
+$('#setgo').onclick=()=>{const P=s=>[...new Set(s.split(/[\s,;]+/).filter(Boolean))],A=P($('#sa').value),B=P($('#sb').value),a=new Set(A),b=new Set(B),f=x=>'{'+x.join(', ')+'}',pw=Math.pow(2,A.length);$('#setout').textContent=`A ∪ B = ${f([...new Set([...A,...B])])}\nA ∩ B = ${f(A.filter(x=>b.has(x)))}\nA − B = ${f(A.filter(x=>!b.has(x)))}\nB − A = ${f(B.filter(x=>!a.has(x)))}\nA △ B = ${f([...A.filter(x=>!b.has(x)),...B.filter(x=>!a.has(x))])}\n|A| = ${A.length},  |B| = ${B.length},  |A × B| = ${A.length*B.length}\nA ⊆ B: ${A.every(x=>b.has(x))},  B ⊆ A: ${B.every(x=>a.has(x))}\nNumber of subsets of A = ${pw<1e15?pw:'more than 10¹⁵'}`};
+/* ---------- formula reference ---------- */
+const FR=[['Algebra','Quadratic formula','x = (−b ± √(b² − 4ac)) / 2a'],['Algebra','Difference of squares','a² − b² = (a − b)(a + b)'],['Algebra','Change of base','log_b(x) = ln(x) / ln(b)'],['Algebra','Binomial theorem','(a + b)ⁿ = Σ C(n,k) aⁿ⁻ᵏ bᵏ'],['Geometry','Distance','d = √((x₂ − x₁)² + (y₂ − y₁)²)'],['Geometry','Circle','A = πr²,  C = 2πr'],['Geometry','Sphere volume','V = (4/3)πr³'],['Geometry','Pythagorean theorem','a² + b² = c²'],['Trigonometry','Pythagorean identity','sin²θ + cos²θ = 1'],['Trigonometry','Law of sines','a / sin A = b / sin B = c / sin C'],['Trigonometry','Law of cosines','c² = a² + b² − 2ab cos C'],['Trigonometry','Double angle','sin 2θ = 2 sin θ cos θ,  cos 2θ = cos²θ − sin²θ'],['Calculus','Power rule','d/dx xⁿ = n xⁿ⁻¹'],['Calculus','Product rule','(fg)′ = f′g + fg′'],['Calculus','Chain rule','d/dx f(g(x)) = f′(g(x)) · g′(x)'],['Calculus','Integral power rule','∫ xⁿ dx = xⁿ⁺¹ / (n + 1) + C,  n ≠ −1'],['Sequences','Arithmetic sum','Sₙ = n/2 · (2a₁ + (n − 1)d)'],['Sequences','Geometric sum','Sₙ = a₁(1 − rⁿ) / (1 − r)'],['Statistics','Z-score','z = (x − μ) / σ'],['Statistics','Sample standard deviation','s = √(Σ(xᵢ − x̄)² / (n − 1))'],['Finance','Compound interest','A = P(1 + r/n)^(nt)']];
+const frr=()=>{const q=$('#fq').value.toLowerCase();$('#fl').innerHTML=FR.filter(f=>f.join(' ').toLowerCase().includes(q)).map(f=>`<div class="tile" data-f="${FR.indexOf(f)}" style="margin-bottom:8px;cursor:copy"><b>${f[1]}</b><span>${f[0]}</span><div style="font:17px Georgia,serif;margin-top:4px">${f[2]}</div></div>`).join('')||'<p class="sub">No formula matches.</p>'};
+$('#fq').oninput=frr;$('#fl').onclick=e=>{const t=e.target.closest('[data-f]');if(t)copy(FR[t.dataset.f][2],t.querySelector('span'))};frr();
+/* ---------- HTML / CSS / JS editor ---------- */
+const DEF={h:'<h1>Hello</h1>\n<button id="b">Clicked 0 times</button>',c:'body{font-family:system-ui;padding:20px}\nbutton{padding:8px 14px;font-size:16px}',j:`let n=0;\nb.onclick=()=>{n++;b.textContent='Clicked '+n+' times';console.log('count',n)}`};
+const ED=Object.assign({},DEF,S.get('hed',{}));let tab='h',hT=0;const edv=t=>$('#e-'+t);
+const hdoc=w=>`<!doctype html><html><head><meta charset="utf-8"><style>${ED.c}</style></head><body>${ED.h}${w?`<script>(function(){const p=(t,a)=>parent.postMessage({hc:t,m:a.map(String).join(' ')},'*');['log','warn','error'].forEach(k=>{const o=console[k];console[k]=(...a)=>{p(k,a);o.apply(console,a)}});addEventListener('error',e=>p('error',[e.message]))})()<\/script>`:''}<script>${ED.j}<\/script></body></html>`;
+function hrun(){$('#hcon').textContent='';$('#hf').srcdoc=hdoc(1)}
+['h','c','j'].forEach(t=>{const a=edv(t);a.value=ED[t];a.oninput=()=>{ED[t]=a.value;S.set('hed',ED);clearTimeout(hT);hT=setTimeout(hrun,350)};a.onkeydown=e=>{if(e.key==='Tab'){e.preventDefault();a.setRangeText('  ',a.selectionStart,a.selectionEnd,'end');a.dispatchEvent(new Event('input'))}}});
+$$('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;$$('[data-t]').forEach(x=>x.classList.toggle('on',x===b));['h','c','j'].forEach(t=>edv(t).hidden=t!==tab)});
+addEventListener('message',e=>{if(e.source===$('#hf').contentWindow&&e.data&&e.data.hc)$('#hcon').textContent+=(e.data.hc==='log'?'':e.data.hc+': ')+e.data.m+'\n'});
+$('#hrun').onclick=hrun;$('#hcp').onclick=e=>copy(hdoc(0),e.currentTarget);$('#hcpt').onclick=e=>copy(edv(tab).value,e.currentTarget);
+$('#hrs').onclick=()=>{['h','c','j'].forEach(t=>{ED[t]=DEF[t];edv(t).value=DEF[t]});S.set('hed',ED);hrun()};hrun();
+/* ---------- Python editor (Pyodide) ---------- */
+$('#pyc').value=S.get('pyc','import math\nfor n in range(1, 6):\n    print(n, n**2, round(math.sqrt(n), 4))\n');
+let PY=null,pyL=null;
+const pyld=()=>pyL||(pyL=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';s.onload=async()=>{try{ok(await loadPyodide())}catch(e){no(e)}};s.onerror=()=>no(Error('Could not load Pyodide. Check your internet connection and open this file in a normal browser tab.'));document.head.append(s)}));
+$('#pyrun').onclick=async()=>{const o=$('#pyout'),st=$('#pyst'),code=$('#pyc').value;S.set('pyc',code);o.textContent='';st.textContent='Loading Python (first run only)…';try{PY=PY||await pyld();PY.setStdout({batched:t=>o.textContent+=t+'\n'});PY.setStderr({batched:t=>o.textContent+=t+'\n'});st.textContent='Running…';await PY.loadPackagesFromImports(code);const r=await PY.runPythonAsync(code);if(r!==undefined&&r!==null)o.textContent+=String(r)+'\n';st.textContent='Done'}catch(e){if(!PY)pyL=null;o.innerHTML+='<span class="err">'+String(e.message||e).replace(/</g,'&lt;')+'</span>';st.textContent='Error'}};
+$('#pyc').onkeydown=e=>{const a=e.target;if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();$('#pyrun').click()}else if(e.key==='Tab'){e.preventDefault();a.setRangeText('    ',a.selectionStart,a.selectionEnd,'end')}};
+$('#pyclr').onclick=()=>{$('#pyout').textContent='';$('#pyst').textContent=''};$('#pycp').onclick=e=>copy($('#pyc').value,e.currentTarget);
+/* ---------- word counter ---------- */
+const wcr=()=>{const t=$('#wci').value,w=t.trim().match(/\S+/g)||[],n=w.length,sen=(t.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g)||[]).filter(x=>x.trim()).length,par=t.split(/\n\s*\n/).filter(x=>x.trim()).length,fr={};w.forEach(x=>{x=x.toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,'');if(x.length>3)fr[x]=(fr[x]||0)+1});
+const top=Object.entries(fr).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,5).map(([k,v])=>k+' ('+v+')').join(', '),mn=x=>x<1?'under a minute':Math.round(x)+' min';
+$('#wco').textContent=`Words: ${n}\nCharacters: ${t.length}\nCharacters without spaces: ${t.replace(/\s/g,'').length}\nSentences: ${sen}\nParagraphs: ${par}\nLines: ${t?t.split('\n').length:0}\nReading time: ${n?mn(n/200):'0 min'}\nSpeaking time: ${n?mn(n/130):'0 min'}${top?'\nMost used words: '+top:''}`};
+$('#wci').oninput=wcr;wcr();
+/* ---------- case converter ---------- */
+const words=s=>s.replace(/([a-z0-9])([A-Z])/g,'$1 $2').split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+const cap=w=>w?w[0].toUpperCase()+w.slice(1).toLowerCase():w;
+const CASES={'UPPERCASE':s=>s.toUpperCase(),'lowercase':s=>s.toLowerCase(),'Title Case':s=>s.toLowerCase().replace(/(^|[\s\-(])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()),'Sentence case':s=>s.toLowerCase().replace(/(^\s*|[.!?]\s+)(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()),'camelCase':s=>words(s).map((w,i)=>i?cap(w):w.toLowerCase()).join(''),'PascalCase':s=>words(s).map(cap).join(''),'snake_case':s=>words(s).map(w=>w.toLowerCase()).join('_'),'kebab-case':s=>words(s).map(w=>w.toLowerCase()).join('-'),'Reverse text':s=>[...s].reverse().join(''),'Tidy spaces':s=>s.replace(/[ \t]+/g,' ').replace(/ ?\n ?/g,'\n').trim(),'Sort lines A–Z':s=>s.split('\n').sort((a,b)=>a.localeCompare(b)).join('\n'),'Remove duplicate lines':s=>[...new Set(s.split('\n'))].join('\n')};
+$('#csb').innerHTML=Object.keys(CASES).map(k=>`<button>${k}</button>`).join('');
+$('#csb').onclick=e=>{const f=CASES[e.target.textContent];if(f&&e.target.tagName==='BUTTON')$('#cso').textContent=f($('#csi').value)};
+
+/* ---------- notes ---------- */
+const nt=$('#nt');
+const savedNotes=S.get('notes','');
+nt.innerHTML=savedNotes;
+const saveNotes=()=>{S.set('notes',nt.innerHTML);$('#nts').textContent='Saved'};
+let notesRange=null;
+const rememberNotesSelection=()=>{const sel=window.getSelection();if(sel&&sel.rangeCount&&nt.contains(sel.anchorNode)&&nt.contains(sel.focusNode))notesRange=sel.getRangeAt(0).cloneRange()};
+const restoreNotesSelection=()=>{nt.focus();const sel=window.getSelection();if(!sel)return;if(notesRange){sel.removeAllRanges();sel.addRange(notesRange)}else{const r=document.createRange();r.selectNodeContents(nt);r.collapse(false);sel.removeAllRanges();sel.addRange(r)}};
+nt.addEventListener('keyup',rememberNotesSelection);nt.addEventListener('mouseup',rememberNotesSelection);nt.addEventListener('input',()=>{rememberNotesSelection();saveNotes()});
+document.querySelector('.notes-toolbar').addEventListener('mousedown',e=>{if(e.target.closest('button')||e.target.closest('label')){rememberNotesSelection();if(e.target.closest('button'))e.preventDefault()}});
+document.querySelector('.notes-toolbar').addEventListener('click',e=>{const b=e.target.closest('button[data-cmd]');if(!b)return;restoreNotesSelection();document.execCommand(b.dataset.cmd,false,null);rememberNotesSelection();saveNotes()});
+$('#ntstyle').onchange=e=>{restoreNotesSelection();document.execCommand('formatBlock',false,e.target.value);rememberNotesSelection();saveNotes()};
+$('#ntfont').onchange=e=>{restoreNotesSelection();document.execCommand('fontName',false,e.target.value);rememberNotesSelection();saveNotes()};
+$('#ntcolor').addEventListener('input',e=>{restoreNotesSelection();document.execCommand('styleWithCSS',false,true);document.execCommand('foreColor',false,e.target.value);rememberNotesSelection();saveNotes()});
+$('#nthighlight').addEventListener('input',e=>{restoreNotesSelection();document.execCommand('styleWithCSS',false,true);let ok=document.execCommand('hiliteColor',false,e.target.value);if(!ok)ok=document.execCommand('backColor',false,e.target.value);rememberNotesSelection();saveNotes()});
+$('#ntlink').onclick=()=>{restoreNotesSelection();const sel=window.getSelection();const selected=sel&&!sel.isCollapsed;let url=prompt('Enter the link URL (https://, http://, or mailto:):');if(!url)return;if(!/^(https?:\/\/|mailto:)/i.test(url)){alert('Use a link beginning with https://, http://, or mailto:');return}if(selected){document.execCommand('createLink',false,url)}else{const a=document.createElement('a');a.href=url;a.textContent=url;a.target='_blank';a.rel='noopener noreferrer';const range=window.getSelection().getRangeAt(0);range.insertNode(a);range.setStartAfter(a);range.collapse(true);sel.removeAllRanges();sel.addRange(range)}rememberNotesSelection();saveNotes()};
+nt.addEventListener('click',e=>{const a=e.target.closest('a');if(a&&nt.contains(a)){a.target='_blank';a.rel='noopener noreferrer'}});
+$('#ntclear').onclick=()=>{restoreNotesSelection();document.execCommand('removeFormat',false,null);rememberNotesSelection();saveNotes()};
+const notesText=()=>nt.innerText||'';
+$('#ntcp').onclick=e=>copy(notesText(),e.currentTarget);
+$('#ntdl').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([notesText()],{type:'text/plain;charset=utf-8'}));a.download='notes.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+/* ---------- JSON ---------- */
+$('#v-json').onclick=e=>{const k=e.target.dataset.j;if(!k)return;const o=$('#jo');try{const t=$('#ji').value.trim();if(!t)throw Error('Paste some JSON first.');const v=JSON.parse(t),ind=$('#jin').value==='tab'?'\t':+$('#jin').value;
+o.textContent=k==='f'?JSON.stringify(v,null,ind):k==='m'?JSON.stringify(v):'Valid JSON. '+(Array.isArray(v)?'An array with '+v.length+' items.':v&&typeof v==='object'?'An object with '+Object.keys(v).length+' keys.':'A '+(v===null?'null':typeof v)+' value.')}catch(x){bad('#jo',x)}};
+/* ---------- encode / decode ---------- */
+const ENC={b64e:s=>{let r='';new TextEncoder().encode(s).forEach(c=>r+=String.fromCharCode(c));return btoa(r)},b64d:s=>{const r=atob(s.trim().replace(/-/g,'+').replace(/_/g,'/'));return new TextDecoder().decode(Uint8Array.from(r,c=>c.charCodeAt(0)))},ue:encodeURIComponent,ud:decodeURIComponent,he:s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'),hd:s=>{const t=document.createElement('textarea');t.innerHTML=s;return t.value}};
+$('#eb').onclick=e=>{const k=e.target.dataset.e;if(!k)return;try{$('#eo').textContent=ENC[k]($('#ei').value)}catch(x){bad('#eo',x.name==='InvalidCharacterError'?Error('That is not valid Base64.'):x.name==='URIError'?Error('That is not valid URL-encoded text.'):x)}};
+/* ---------- password generator and random picker ---------- */
+const rint=n=>{const a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do crypto.getRandomValues(a);while(a[0]>=lim);return a[0]%n};
+$('#pwn').oninput=()=>$('#pwl').textContent=$('#pwn').value;
+$('#pwg').onclick=()=>{try{const ex=$('#pwx').checked,rm=x=>ex?x.replace(/[O0Il1|]/g,''):x,sets=[];
+if($('#pwu').checked)sets.push(rm('ABCDEFGHIJKLMNOPQRSTUVWXYZ'));if($('#pwlw').checked)sets.push(rm('abcdefghijklmnopqrstuvwxyz'));if($('#pwd').checked)sets.push(rm('0123456789'));if($('#pws').checked)sets.push('!@#$%^&*()-_=+[]{};:,.?');
+if(!sets.length)throw Error('Turn on at least one character type.');const L=+$('#pwn').value,c=Math.min(20,Math.max(1,Math.floor(+$('#pwc').value)||1)),all=sets.join(''),out=[];
+for(let i=0;i<c;i++){const ch=sets.map(x=>x[rint(x.length)]);while(ch.length<L)ch.push(all[rint(all.length)]);for(let j=ch.length-1;j>0;j--){const k=rint(j+1);[ch[j],ch[k]]=[ch[k],ch[j]]}out.push(ch.slice(0,L).join(''))}
+const bits=Math.round(L*Math.log2(all.length));$('#pwr').textContent=out.join('\n');$('#pwb').textContent=`About ${bits} bits of strength (${bits<50?'weak':bits<70?'okay':bits<100?'strong':'very strong'}).`}catch(x){bad('#pwr',x);$('#pwb').textContent=''}};
+const rr=t=>{$('#rro').textContent=t},lst=()=>$('#rli').value.split('\n').map(x=>x.trim()).filter(Boolean);
+$('#rdg').onclick=()=>{const n=Math.min(50,Math.max(1,Math.floor(+$('#rdn').value)||1)),sd=Math.min(1000,Math.max(2,Math.floor(+$('#rds').value)||6)),r=Array.from({length:n},()=>rint(sd)+1);rr(`${n}d${sd}: ${r.join(', ')}${n>1?'\nTotal: '+r.reduce((a,b)=>a+b,0):''}`)};
+$('#rcf').onclick=()=>rr(rint(2)?'Heads':'Tails');
+$('#rng').onclick=()=>{let a=Math.floor(+$('#rmn').value),b=Math.floor(+$('#rmx').value);if(isNaN(a)||isNaN(b))return rr('Enter whole numbers.');if(a>b)[a,b]=[b,a];if(b-a>4e9)return rr('That range is too large.');rr(String(a+rint(b-a+1)))};
+$('#rpk').onclick=()=>{const l=lst();rr(l.length?l[rint(l.length)]:'Add some options first.')};
+$('#rsh').onclick=()=>{const l=lst();for(let i=l.length-1;i>0;i--){const j=rint(i+1);[l[i],l[j]]=[l[j],l[i]]}rr(l.length?l.map((x,i)=>`${i+1}. ${x}`).join('\n'):'Add some options first.')};
+/* ---------- color tools ---------- */
+const cx=document.createElement('canvas').getContext('2d');
+function pcol(v){const r=[];for(const b of ['#000000','#ffffff']){cx.fillStyle=b;cx.fillStyle=v;r.push(cx.fillStyle)}return r[0]===r[1]&&/^#[0-9a-f]{6}$/i.test(r[0])?r[0].toLowerCase():null}
+const h2x=(h,s,l)=>{h=((h%360)+360)%360;const a=s*Math.min(l,1-l),f=n=>{const k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))};return '#'+[f(0),f(8),f(4)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const lum=hx=>{const c=[1,3,5].map(i=>{const v=parseInt(hx.substr(i,2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+const cr=(a,b)=>{const x=lum(a),y=lum(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+function kupd(hx){const [h,s,l]=hsl(hx),rgb=[1,3,5].map(i=>parseInt(hx.substr(i,2),16)),cw=cr(hx,'#ffffff'),cb=cr(hx,'#000000');
+$('#ko').textContent=`HEX  ${hx}\nRGB  rgb(${rgb.join(', ')})\nHSL  hsl(${Math.round(h)}, ${Math.round(s*100)}%, ${Math.round(l*100)}%)\n\nContrast with white: ${cw.toFixed(2)}:1\nContrast with black: ${cb.toFixed(2)}:1\nBest text color: ${cw>cb?'white':'black'}`;
+const P=[['This color',hx],['Complement',h2x(h+180,s,l)],['Analogous −30°',h2x(h-30,s,l)],['Analogous +30°',h2x(h+30,s,l)],['Triadic +120°',h2x(h+120,s,l)],['Triadic +240°',h2x(h+240,s,l)],['Lighter',h2x(h,s,Math.min(.92,l+.2))],['Darker',h2x(h,s,Math.max(.08,l-.2))]];
+$('#kp').innerHTML=P.map(([n,c])=>`<div data-c="${c}" style="background:${c};color:${cr(c,'#ffffff')>cr(c,'#000000')?'#fff':'#000'};border-radius:10px;padding:14px 8px;cursor:copy;font-size:12px;text-align:center;border:1px solid var(--ln)"><div>${n}</div><b style="font-family:ui-monospace,monospace">${c}</b></div>`).join('')}
+$('#kc').oninput=e=>{$('#kt').value=e.target.value;kupd(e.target.value)};
+$('#kt').oninput=e=>{const c=pcol(e.target.value.trim());if(c){$('#kc').value=c;kupd(c)}};
+$('#kp').onclick=e=>{const d=e.target.closest('[data-c]');if(d)copy(d.dataset.c,d.querySelector('b'))};
+kupd('#3b82f6');
+/* ---------- timer and stopwatch ---------- */
+const p2=n=>String(n).padStart(2,'0');
+let cdE=0,cdT=0,cdR=0,cdOn=false,AC=null;
+const cdSet=ms=>{const t=Math.ceil(ms/1000);$('#tmd').textContent=p2(Math.floor(t/60))+':'+p2(t%60)};
+const cdStart=()=>Math.max(0,(Math.floor(+$('#tmm').value)||0)*60+(Math.floor(+$('#tms').value)||0))*1000;
+function beep(){try{if(!AC)return;[0,.3,.6].forEach(t=>{const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=880;g.gain.setValueAtTime(.2,AC.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+t+.25);o.start(AC.currentTime+t);o.stop(AC.currentTime+t+.26)})}catch(e){}}
+function cdTick(){const left=cdE-Date.now();if(left<=0){clearInterval(cdT);cdOn=false;cdR=0;$('#tmd').textContent='Time’s up';$('#tmg').textContent='Start';beep()}else cdSet(left)}
+$('#tmg').onclick=()=>{try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}
+if(cdOn){clearInterval(cdT);cdOn=false;cdR=Math.max(0,cdE-Date.now());$('#tmg').textContent='Resume';return}
+const ms=cdR||cdStart();if(!ms)return;cdE=Date.now()+ms;cdOn=true;$('#tmg').textContent='Pause';clearInterval(cdT);cdT=setInterval(cdTick,100);cdTick()};
+$('#tmr').onclick=()=>{clearInterval(cdT);cdOn=false;cdR=0;$('#tmg').textContent='Start';cdSet(cdStart())};
+['#tmm','#tms'].forEach(x=>$(x).oninput=()=>{if(!cdOn&&!cdR)cdSet(cdStart())});
+let swS=0,swA=0,swT=0,swOn=false,swL=[];
+const swNow=()=>swA+(swOn?performance.now()-swS:0);
+const swFmt=ms=>{const t=Math.floor(ms/10);return p2(Math.floor(t/6000))+':'+p2(Math.floor(t/100)%60)+'.'+p2(t%100)};
+const swDraw=()=>{$('#swd').textContent=swFmt(swNow())};
+function swLap(){$('#swo').textContent=swL.length?swL.map((t,i)=>`Lap ${i+1}: ${swFmt(t)}  (+${swFmt(t-(swL[i-1]||0))})`).reverse().join('\n'):'Laps appear here.'}
+$('#swg').onclick=()=>{if(swOn){swA+=performance.now()-swS;swOn=false;clearInterval(swT);$('#swg').textContent='Resume'}else{swS=performance.now();swOn=true;swT=setInterval(swDraw,30);$('#swg').textContent='Stop'}swDraw()};
+$('#swl').onclick=()=>{if(swNow()>0){swL.push(swNow());swLap()}};
+$('#swr').onclick=()=>{clearInterval(swT);swOn=false;swA=0;swL=[];$('#swg').textContent='Start';swDraw();swLap()};
+/* ---------- date calculator ---------- */
+const pdt=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);if(!m)throw Error('Pick a valid date.');return new Date(Date.UTC(+m[1],+m[2]-1,+m[3]))};
+const iso=d=>d.toISOString().slice(0,10),DN=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const longd=d=>`${DN[d.getUTCDay()]}, ${MN[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+const today=()=>{const n=new Date();return new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate()))};
+['#d1','#d2','#d3'].forEach(x=>$(x).value=iso(today()));
+function ymd(a,b){let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth(),d=b.getUTCDate()-a.getUTCDate();if(d<0){m--;d+=new Date(Date.UTC(b.getUTCFullYear(),b.getUTCMonth(),0)).getUTCDate()}if(m<0){y--;m+=12}return `${y} years, ${m} months, ${d} days`}
+$('#dbg').onclick=()=>{try{let a=pdt($('#d1').value),b=pdt($('#d2').value),rev=false;if(a>b){[a,b]=[b,a];rev=true}const days=Math.round((b-a)/864e5);let bd=0;if(days<=200000)for(let i=0;i<=days;i++){const w=new Date(a.getTime()+i*864e5).getUTCDay();if(w&&w<6)bd++}
+$('#dto').textContent=`${days} days${rev?' (the dates were reversed)':''}\n${Math.floor(days/7)} weeks and ${days%7} days\n${ymd(a,b)}\nWeekdays (Mon–Fri, both ends included): ${days<=200000?bd:'too long to count'}`}catch(x){bad('#dto',x)}};
+$('#dag').onclick=()=>{try{const a=pdt($('#d3').value),n=Math.round(+$('#d4').value);if(isNaN(n))throw Error('Enter a number of days.');const r=new Date(a.getTime()+n*864e5);if(isNaN(r))throw Error('That date is out of range.');$('#dto').textContent=`${longd(a)}\n${n>=0?'+':'−'} ${Math.abs(n)} days\n= ${longd(r)} (${iso(r)})`}catch(x){bad('#dto',x)}};
+$('#dgg').onclick=()=>{try{const b=pdt($('#d5').value),t=today();if(b>t)throw Error('That birth date is in the future.');let nx=new Date(Date.UTC(t.getUTCFullYear(),b.getUTCMonth(),b.getUTCDate()));if(nx<t)nx=new Date(Date.UTC(t.getUTCFullYear()+1,b.getUTCMonth(),b.getUTCDate()));
+$('#dto').textContent=`Age: ${ymd(b,t)}\nDays lived: ${Math.round((t-b)/864e5).toLocaleString()}\nBorn on a ${DN[b.getUTCDay()]}\nNext birthday: ${longd(nx)} (in ${Math.round((nx-t)/864e5)} days)`}catch(x){bad('#dto',x)}};
+
+/* ---------- extra utility tools ---------- */
+const dlBlob=(name,blob)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200)};
+const escHTML=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+// PDF merge and page extraction (pdf-lib CDN)
+$('#pdfMerge').onclick=async()=>{try{if(!window.PDFLib)throw Error('PDF library did not load. Check your internet connection.');const files=[...$('#pdfFiles').files];if(files.length<2)throw Error('Choose at least two PDF files.');const out=await PDFLib.PDFDocument.create();for(const f of files){const doc=await PDFLib.PDFDocument.load(await f.arrayBuffer());const pages=await out.copyPages(doc,doc.getPageIndices());pages.forEach(pg=>out.addPage(pg))}dlBlob('merged.pdf',new Blob([await out.save()],{type:'application/pdf'}));$('#pdfOut').textContent=`Merged ${files.length} PDFs into ${out.getPageCount()} pages.`}catch(e){bad('#pdfOut',e)}};
+$('#pdfSplit').onclick=async()=>{try{if(!window.PDFLib)throw Error('PDF library did not load. Check your internet connection.');const f=$('#pdfSplitFile').files[0];if(!f)throw Error('Choose a PDF file.');const src=await PDFLib.PDFDocument.load(await f.arrayBuffer()),spec=$('#pdfPages').value.trim();if(!spec)throw Error('Enter pages, e.g. 1-3,5.');const idx=[];for(const part of spec.split(',')){const m=part.trim().match(/^(\d+)(?:\s*-\s*(\d+))?$/);if(!m)throw Error('Use a page list like 1-3,5.');let a=+m[1],b=+(m[2]||m[1]);if(a<1||b<a||b>src.getPageCount())throw Error(`Page range ${part} is outside 1–${src.getPageCount()}.`);for(let n=a;n<=b;n++)idx.push(n-1)}const out=await PDFLib.PDFDocument.create(),pages=await out.copyPages(src,[...new Set(idx)]);pages.forEach(pg=>out.addPage(pg));dlBlob('extracted-pages.pdf',new Blob([await out.save()],{type:'application/pdf'}));$('#pdfOut').textContent=`Extracted ${pages.length} page(s) from ${src.getPageCount()} total pages.`}catch(e){bad('#pdfOut',e)}};
+// Image compressor and resizer
+let imgObj=null;$('#imgQ').oninput=()=>$('#imgQVal').textContent=$('#imgQ').value+'%';$('#imgFile').onchange=()=>{const f=$('#imgFile').files[0];if(!f)return;const u=URL.createObjectURL(f);imgObj=new Image();imgObj.onload=()=>{$('#imgW').value=imgObj.naturalWidth;$('#imgH').value=imgObj.naturalHeight;$('#imgPreview').src=u;$('#imgPreview').style.display='block';$('#imgOut').textContent=`Original: ${imgObj.naturalWidth} × ${imgObj.naturalHeight}px · ${(f.size/1024).toFixed(1)} KB`};imgObj.src=u};$('#imgGo').onclick=()=>{try{if(!imgObj)throw Error('Choose an image first.');const w=Math.max(1,Math.floor(+$('#imgW').value||imgObj.naturalWidth)),h=Math.max(1,Math.floor(+$('#imgH').value||imgObj.naturalHeight));if(w*h>40000000)throw Error('Image dimensions are too large (maximum 40 megapixels).');const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(imgObj,0,0,w,h);c.toBlob(b=>{if(!b){$('#imgOut').textContent='Could not convert this image format.';return}dlBlob('converted-image.'+({'image/webp':'webp','image/jpeg':'jpg','image/png':'png'}[$('#imgFmt').value]),b);$('#imgOut').textContent=`Output: ${w} × ${h}px · ${(b.size/1024).toFixed(1)} KB`},$('#imgFmt').value,+$('#imgQ').value/100)}catch(e){bad('#imgOut',e)}};
+// Markdown preview (safe, intentionally small Markdown subset)
+function renderMD(t){let x=escHTML(t);x=x.replace(/^###### (.*)$/gm,'<h6>$1</h6>').replace(/^##### (.*)$/gm,'<h5>$1</h5>').replace(/^#### (.*)$/gm,'<h4>$1</h4>').replace(/^### (.*)$/gm,'<h3>$1</h3>').replace(/^## (.*)$/gm,'<h2>$1</h2>').replace(/^# (.*)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/^&gt; (.*)$/gm,'<blockquote>$1</blockquote>').replace(/^[-*] (.*)$/gm,'• $1').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');return x.split(/\n{2,}/).map(p=>/^<h[1-6]>|^<blockquote>/.test(p)?p:'<p>'+p.replace(/\n/g,'<br>')+'</p>').join('')};const mdUpdate=()=>$('#mdPreview').innerHTML=renderMD($('#mdInput').value);$('#mdInput').oninput=mdUpdate;mdUpdate();
+// CSV parsing/serialization with quoted fields
+function parseCSV(t){const rows=[];let row=[],v='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'&&t[i+1]==='"'){v+='"';i++}else if(c==='"')q=false;else v+=c}else if(c==='"')q=true;else if(c===','){row.push(v);v=''}else if(c==='\n'){row.push(v.replace(/\r$/,''));rows.push(row);row=[];v=''}else v+=c}if(q)throw Error('CSV contains an unclosed quote.');if(v.length||row.length){row.push(v.replace(/\r$/,''));rows.push(row)}return rows.filter(r=>r.some(c=>c!==''))}function csvCell(v){v=v==null?'':String(v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+$('#csvToJson').onclick=()=>{try{const rows=parseCSV($('#csvInput').value);if(rows.length<2)throw Error('Provide a header row and at least one data row.');const heads=rows[0];const data=rows.slice(1).map(r=>Object.fromEntries(heads.map((h,i)=>[h,r[i]??''])));$('#csvOutput').textContent=JSON.stringify(data,null,2)}catch(e){bad('#csvOutput',e)}};$('#jsonToCsv').onclick=()=>{try{const data=JSON.parse($('#csvInput').value);if(!Array.isArray(data)||!data.every(x=>x&&typeof x==='object'&&!Array.isArray(x)))throw Error('Input must be an array of JSON objects.');const keys=[...new Set(data.flatMap(Object.keys))];$('#csvOutput').textContent=[keys.map(csvCell).join(','),...data.map(o=>keys.map(k=>csvCell(o[k])).join(','))].join('\n')}catch(e){bad('#csvOutput',e)}};$('#csvDownload').onclick=()=>dlBlob('converted.csv',new Blob([$('#csvOutput').textContent],{type:'text/csv;charset=utf-8'}));
+// Regex tester
+$('#rxRun').onclick=()=>{try{const flags=$('#rxFlags').value;if(/[^dgimsuvy]/.test(flags)||new Set(flags).size!==flags.length)throw Error('Use valid, non-duplicated JavaScript regex flags.');const re=new RegExp($('#rxPattern').value,flags),t=$('#rxText').value;let matches=[],m,guard=0;if(re.global||re.sticky){while((m=re.exec(t))&&guard++<1000){matches.push(`Match ${matches.length+1}: “${m[0]}” at index ${m.index}${m.length>1?' · groups: '+m.slice(1).map(x=>x??'').join(', '):''}`);if(m[0]==='')re.lastIndex++}}else{m=re.exec(t);if(m)matches.push(`Match: “${m[0]}” at index ${m.index}`)}$('#rxOut').textContent=matches.length?`${matches.length} match(es) found.\n\n${matches.join('\n')}`:'No matches found.'}catch(e){bad('#rxOut',e)}};
+// UUID generator
+$('#uuidGo').onclick=()=>{try{const n=Math.max(1,Math.min(100,Math.floor(+$('#uuidCount').value)||1));const make=()=>crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=crypto.getRandomValues(new Uint8Array(1))[0]%16;return(c==='x'?r:(r&3|8)).toString(16)});$('#uuidOut').textContent=Array.from({length:n},make).join('\n')}catch(e){bad('#uuidOut',e)}};$('#uuidCopy').onclick=e=>copy($('#uuidOut').textContent,e.currentTarget);
+// CSS gradient
+function gradientUpdate(){const code=`background: linear-gradient(${$('#gradAngle').value}deg, ${$('#gradA').value}, ${$('#gradB').value});`;$('#gradCode').value=code;$('#gradPreview').style.background=code;$('#gradAngleVal').textContent=$('#gradAngle').value+'°'}['#gradA','#gradB','#gradAngle'].forEach(id=>$(id).oninput=gradientUpdate);$('#gradCopy').onclick=e=>copy($('#gradCode').value,e.currentTarget);gradientUpdate();
+// Box shadow
+function shadowUpdate(){const rgba=`rgba(0, 0, 0, ${(+$('#shOpacity').value/100).toFixed(2)})`,code=`box-shadow: ${$('#shX').value}px ${$('#shY').value}px ${$('#shBlur').value}px ${$('#shSpread').value}px ${rgba};`;$('#shadowCode').value=code;$('#shadowPreview>div').style.boxShadow=code.replace('box-shadow: ','').replace(/;$/,'')}['#shX','#shY','#shBlur','#shSpread','#shOpacity'].forEach(id=>$(id).oninput=shadowUpdate);$('#shadowCopy').onclick=e=>copy($('#shadowCode').value,e.currentTarget);shadowUpdate();
+// File size converter
+const units=[['B',1],['KB',1000],['MB',1e6],['GB',1e9],['TB',1e12],['KiB',1024],['MiB',1048576],['GiB',1073741824],['TiB',1099511627776]];function fsUpdate(){const v=Math.max(0,Number($('#fsValue').value)||0),b=v*Number($('#fsFrom').value);$('#fsOut').textContent=units.map(([n,k])=>`${n}: ${(b/k).toLocaleString(undefined,{maximumFractionDigits:6})}`).join('\n')}['#fsValue','#fsFrom'].forEach(id=>$(id).oninput=fsUpdate);fsUpdate();
+// Text diff (line-based)
+$('#diffGo').onclick=()=>{const a=$('#diffA').value.split('\n'),b=$('#diffB').value.split('\n'),out=[];let i=0,j=0;while(i<a.length||j<b.length){if(i<a.length&&j<b.length&&a[i]===b[j]){out.push('  '+a[i]);i++;j++}else if(i<a.length&&(!b.slice(j).includes(a[i])||j>=b.length)){out.push('− '+a[i++])}else if(j<b.length&&(!a.slice(i).includes(b[j])||i>=a.length)){out.push('+ '+b[j++])}else{out.push('− '+a[i++]);out.push('+ '+b[j++])}}$('#diffOut').textContent=out.join('\n')||'Texts are identical.'};
+// Split bill
+$('#billGo').onclick=()=>{const subtotal=+$('#billSubtotal').value,tax=+$('#billTax').value,tip=+$('#billTip').value,people=Math.floor(+$('#billPeople').value);if([subtotal,tax,tip].some(x=>!isFinite(x)||x<0)||people<1){bad('#billOut',Error('Enter non-negative amounts and at least one person.'));return}const taxAmt=subtotal*tax/100,tipAmt=subtotal*tip/100,total=subtotal+taxAmt+tipAmt;$('#billOut').textContent=`Subtotal: $${subtotal.toFixed(2)}\nTax: $${taxAmt.toFixed(2)}\nTip: $${tipAmt.toFixed(2)}\nTotal: $${total.toFixed(2)}\n\nEach of ${people} people pays: $${(total/people).toFixed(2)}`};$('#billGo').click();
+// Dedicated JSON to CSV converter
+$('#jsonCsvGo').onclick=()=>{try{const data=JSON.parse($('#jsonCsvInput').value);if(!Array.isArray(data)||!data.every(x=>x&&typeof x==='object'&&!Array.isArray(x)))throw Error('Enter an array of JSON objects.');const keys=[...new Set(data.flatMap(Object.keys))];$('#jsonCsvOut').textContent=[keys.map(csvCell).join(','),...data.map(o=>keys.map(k=>csvCell(o[k])).join(','))].join('\n')}catch(e){bad('#jsonCsvOut',e)}};$('#jsonCsvDownload').onclick=()=>dlBlob('data.csv',new Blob([$('#jsonCsvOut').textContent],{type:'text/csv;charset=utf-8'}));
+// Image format converter
+$('#ifGo').onclick=()=>{const f=$('#ifFile').files[0];if(!f){bad('#ifOut',Error('Choose an image first.'));return}const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);c.toBlob(b=>{if(!b){bad('#ifOut',Error('Conversion failed.'));return}const ext={'image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[$('#ifFormat').value];dlBlob('converted.'+ext,b);$('#ifOut').textContent=`Converted ${im.naturalWidth} × ${im.naturalHeight}px · ${(b.size/1024).toFixed(1)} KB`},$('#ifFormat').value,.92);URL.revokeObjectURL(u)};im.onerror=()=>bad('#ifOut',Error('Could not read that image.'));im.src=u};
+// Contrast checker
+function contrastUpdate(){const a=$('#conText').value,b=$('#conBg').value,lum2=hx=>{const c=[1,3,5].map(i=>{const v=parseInt(hx.slice(i,i+2),16)/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2]},l1=lum2(a),l2=lum2(b),ratio=(Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);$('#conPreview').style.color=a;$('#conPreview').style.background=b;$('#conOut').textContent=`Contrast ratio: ${ratio.toFixed(2)}:1\nWCAG AA normal text (4.5:1): ${ratio>=4.5?'Pass':'Fail'}\nWCAG AA large text (3:1): ${ratio>=3?'Pass':'Fail'}\nWCAG AAA normal text (7:1): ${ratio>=7?'Pass':'Fail'}`}['#conText','#conBg'].forEach(id=>$(id).oninput=contrastUpdate);contrastUpdate();
+
+/* ---------- home: changing fonts ---------- */
+const HF=['Pacifico','Orbitron','"Playfair Display"','"Bebas Neue"','Lobster','"Press Start 2P"','Righteous','Caveat','"Special Elite"','"Abril Fatface"','Monoton','"Permanent Marker"','Georgia','"Courier New"','Impact','"Trebuchet MS"'];
+let hrT=0,hrI=-1;
+function heroRun(on){clearInterval(hrT);hrT=0}
+/* ---------- copy buttons ---------- */
+$$('.res').forEach(r=>{const b=document.createElement('button');b.innerHTML='Copy result';b.style.marginTop='6px';b.onclick=()=>{if(r.id==='wco'&&$('#wci').value.trim().toLowerCase()==='games'){window.location.href='https://poki.com/';return}copy(r.innerText,b)};r.after(b)});
+show(location.hash.slice(1)||'home');
+</script>
+<script type="module">
+  // iPad-style magnetic cursor. The system cursor is hidden only while this effect is active.
+  let cursorModule = null;
+  let cursorActive = false;
+  let targetObserver = null;
+
+  const finePointer = window.matchMedia('(pointer: fine)').matches;
+  const motionAllowed = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const settingEnabled = () => {
+    try { return localStorage.getItem('cursorEnabled') !== 'false'; }
+    catch (_) { return true; }
+  };
+
+  const tagCursorTargets = (root = document) => {
+    if (!root || typeof root.querySelectorAll !== 'function') return;
+    root.querySelectorAll('a, button, .tile, [role="button"], [data-c], [data-m], [data-a]').forEach(el => {
+      if (!el.hasAttribute('data-cursor')) el.setAttribute('data-cursor', 'block');
+    });
+    root.querySelectorAll('input:not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]').forEach(el => {
+      if (!el.hasAttribute('data-cursor')) el.setAttribute('data-cursor', 'text');
+    });
+  };
+
+  const cursorConfig = () => {
+    const light = document.documentElement.dataset.theme === 'light';
+    const stroke = light ? 'rgba(25,29,36,0.88)' : 'rgba(255,255,255,0.9)';
+    const fill = light ? 'rgba(25,29,36,0.88)' : 'rgba(255,255,255,0.9)';
+    return {
+      enableLighting: false,
+      enableMouseDownEffect: true,
+      enableAutoTextCursor: true,
+      enableAutoUpdateCursor: true,
+      normalStyle: { width: 16, height: 16, radius: '50%', background: 'transparent', border: `1px solid ${stroke}`, backdropBlur: '0px', durationPosition: 65 },
+      textStyle: { width: 3, height: 22, radius: '3px', background: fill, border: '0', backdropBlur: '0px', durationPosition: 55 },
+      blockStyle: { radius: 'auto', background: 'transparent', border: `1px solid ${stroke}`, backdropBlur: '0px', durationPosition: 70 },
+      mouseDownStyle: { scale: 0.94, background: 'transparent', backdropBlur: '0px' }
+    };
+  };
+
+  function startCursor() {
+    if (!cursorModule || cursorActive || !finePointer || !motionAllowed || !settingEnabled()) return;
+    try {
+      tagCursorTargets();
+      cursorModule.initCursor(cursorConfig());
+      cursorActive = true;
+      document.documentElement.classList.add('ipad-cursor-ready');
+      if (!targetObserver) {
+        targetObserver = new MutationObserver(records => {
+          for (const record of records) for (const node of record.addedNodes) {
+            if (node.nodeType === 1) tagCursorTargets(node);
+          }
+        });
+        targetObserver.observe(document.body, { childList: true, subtree: true });
+      }
+    } catch (error) {
+      cursorActive = false;
+      document.documentElement.classList.remove('ipad-cursor-ready');
+      console.warn('Bonfyre cursor effect could not start:', error);
+    }
+  }
+
+  function stopCursor() {
+    document.documentElement.classList.remove('ipad-cursor-ready');
+    if (cursorActive && cursorModule && typeof cursorModule.disposeCursor === 'function') {
+      try { cursorModule.disposeCursor(); }
+      catch (error) { console.warn('Bonfyre cursor effect could not be disposed cleanly:', error); }
+    }
+    cursorActive = false;
+  }
+
+  window.setBonfyreCursorEnabled = enabled => {
+    if (enabled) startCursor();
+    else stopCursor();
+  };
+
+  try {
+    if (finePointer && motionAllowed) {
+      const imported = await import('https://unpkg.com/ipad-cursor@0.5.2');
+      cursorModule = imported.default || imported;
+      if (settingEnabled()) startCursor();
+
+      // Keep the custom cursor readable whenever the user switches themes.
+      new MutationObserver(() => {
+        if (!cursorActive || !cursorModule || typeof cursorModule.updateConfig !== 'function') return;
+        try { cursorModule.updateConfig(cursorConfig()); }
+        catch (error) { console.warn('Bonfyre cursor theme update failed:', error); }
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+  } catch (error) {
+    document.documentElement.classList.remove('ipad-cursor-ready');
+    console.warn('Bonfyre cursor effect could not load:', error);
+  }
+</script></body></html>
